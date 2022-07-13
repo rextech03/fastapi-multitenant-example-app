@@ -1,6 +1,7 @@
 import os
 from contextlib import contextmanager
-from typing import Optional, Union
+from datetime import datetime, time, timedelta
+from typing import List, Optional, Union
 
 import alembic  # pylint: disable=E0401
 import alembic.config  # pylint: disable=E0401
@@ -16,9 +17,13 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from loguru import logger
 from sqlalchemy import MetaData, create_engine, func, select, text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session, joinedload, relationship, sessionmaker
 
-from app.schemas.schemas import Books, StandardResponse
+# from app.api.users import user_router
+from app.schemas.schemas import Book, StandardResponse, User
+
+# from app.models.models import User
+
 
 load_dotenv(".env")
 
@@ -51,12 +56,34 @@ class Tenant(Base):
     __table_args__ = {"schema": "shared"}
 
 
-class Book(Base):
+class Books(Base):
     __tablename__ = "books"
 
     id = sa.Column(sa.Integer, primary_key=True, nullable=False)
     title = sa.Column(sa.String(256), nullable=False, index=True, unique=True)
     author = sa.Column(sa.String(256), nullable=False, unique=True)
+
+
+class Roles(Base):
+    __tablename__ = "roles"
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    role_name = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
+    role_description = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
+    users_FK = relationship("Users", back_populates="role_FK")
+
+
+class Users(Base):
+    __tablename__ = "users"
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    # uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    email = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True, unique=True)
+    first_name = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
+    last_name = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
+    user_role_id = sa.Column(sa.INTEGER(), sa.ForeignKey("roles.id"), autoincrement=False, nullable=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+
+    role_FK = relationship("Roles", back_populates="users_FK")
 
 
 def get_shared_metadata():
@@ -192,28 +219,28 @@ def read_item(name: str, schema: str, host: str):
 # Books CRUD
 
 
-@app.get("/books", response_model=list[Books])  #
+@app.get("/books", response_model=List[Book])  #
 def read_user(*, db: Session = Depends(get_db)):
-    db_user = db.execute(select(Book)).scalars().all()
-    if db_user is None:
+    db_book = db.execute(select(Books)).scalars().all()
+    if db_book is None:
         raise HTTPException(status_code=404, detail="Book not found")
-    return db_user
+    return db_book
 
 
-@app.get("/books/{book_id}", response_model=Books)  #
+@app.get("/books/{book_id}", response_model=Book)  #
 def read_user(*, db: Session = Depends(get_db), book_id: int):
-    db_user = db.execute(select(Book).where(Book.id == book_id)).scalar_one_or_none()
-    if db_user is None:
+    db_book = db.execute(select(Books).where(Book.id == book_id)).scalar_one_or_none()
+    if db_book is None:
         raise HTTPException(status_code=404, detail="Book not found")
-    return db_user
+    return db_book
 
 
-@app.post("/books", response_model=Books)  #
+@app.post("/books", response_model=Book)  #
 def read_user(*, db: Session = Depends(get_db)):
 
     faker = Faker()
 
-    new_book = Book(
+    new_book = Books(
         title=faker.catch_phrase(),
         author=faker.name(),
     )
@@ -227,8 +254,61 @@ def read_user(*, db: Session = Depends(get_db)):
 @app.delete("/books/{book_id}", response_model=StandardResponse)  #
 def read_user(*, db: Session = Depends(get_db), book_id: int):
 
-    db_book = db.execute(select(Book).where(Book.id == book_id)).scalar_one_or_none()
+    db_book = db.execute(select(Books).where(Book.id == book_id)).scalar_one_or_none()
     db.delete(db_book)
     db.commit()
 
     return {"ok": True}
+
+
+@app.get("/users")
+async def user_get_all(*, db: Session = Depends(get_db)):
+    db_user = db.execute(select(Users)).scalars().all()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="Book not found")
+    return db_user
+
+
+@app.post("/users")  # , response_model=User
+def read_user(*, db: Session = Depends(get_db)):
+
+    faker = Faker()
+
+    new_user = Users(
+        email=faker.email(),
+        first_name=faker.first_name(),
+        last_name=faker.last_name(),
+        user_role_id=1,
+        created_at=datetime.utcnow(),
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return new_user
+
+
+@app.post("/roles")  # , response_model=User
+def read_user(*, db: Session = Depends(get_db)):
+
+    faker = Faker()
+
+    new_user = Users(
+        email=faker.email(),
+        first_name=faker.first_name(),
+        last_name=faker.last_name(),
+        user_role_id=1,
+        created_at=datetime.utcnow(),
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return new_user
+
+
+# app.include_router(
+#     user_router,
+#     prefix="/user",
+#     tags=["USER"],
+# )
