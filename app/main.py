@@ -326,23 +326,11 @@ async def auth_login(*, shared_db: Session = Depends(get_public_db), users: User
         if db_shared_user is None:
             raise HTTPException(status_code=404, detail="User not found")
 
-        # with db.session.connection(execution_options={"schema_translate_map":{"tenant":tenant_schema}}):
-
         # ----------------
         schema_translate_map = dict(tenant=db_shared_tenant.schema)
         connectable = engine.execution_options(schema_translate_map=schema_translate_map)
         with Session(autocommit=False, autoflush=False, bind=connectable) as db:
             db_user = db.execute(select(Users).where(Users.id == 1)).scalar_one_or_none()
-
-        # update_package = {
-        #     "updated_at": datetime.utcnow(),
-        # }
-
-        # for key, value in update_package.items():
-        #     setattr(db_user, key, value)
-        # db.add(db_user)
-        # db.commit()
-        # db.refresh(db_user)
 
     except Exception as err:
         print(err)
