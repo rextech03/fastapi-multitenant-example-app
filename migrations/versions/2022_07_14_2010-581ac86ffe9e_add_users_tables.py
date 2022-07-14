@@ -1,8 +1,8 @@
-"""Add Users Roles Permissions
+"""Add Users tables
 
-Revision ID: 07193dcd6b96
-Revises: ec23ff43c7b6
-Create Date: 2022-07-13 18:08:14.193851
+Revision ID: 581ac86ffe9e
+Revises: 080e24511d27
+Create Date: 2022-07-14 20:10:56.976794
 
 """
 import sqlalchemy as sa
@@ -11,8 +11,8 @@ from migrations.tenant import for_each_tenant_schema
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "07193dcd6b96"
-down_revision = "ec23ff43c7b6"
+revision = "581ac86ffe9e"
+down_revision = "080e24511d27"
 branch_labels = None
 depends_on = None
 

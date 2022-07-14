@@ -1,7 +1,11 @@
+from uuid import uuid4
+
 import sqlalchemy as sa
 from sqlalchemy import MetaData, create_engine, func, select, text
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session, joinedload, relationship, sessionmaker
+from sqlalchemy.sql import func
 
 metadata = sa.MetaData(schema="shared")
 Base = declarative_base(metadata=metadata)
@@ -9,11 +13,11 @@ Base = declarative_base(metadata=metadata)
 
 class Tenant(Base):
     __tablename__ = "tenants"
-
-    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False)
-    name = sa.Column("name", sa.String(256), nullable=False, index=True, unique=True)
-    schema = sa.Column("schema", sa.String(256), nullable=False, unique=True)
-    host = sa.Column("host", sa.String(256), nullable=False, unique=True)
+    id = sa.Column(sa.Integer(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    uuid = sa.Column(UUID(as_uuid=True), default=uuid4(), unique=True)
+    name = sa.Column("name", sa.String(128), nullable=True)
+    schema = sa.Column(sa.String(128), nullable=True)
+    schema_header_id = sa.Column("schema_header_id", sa.String(128), nullable=True)
 
     __table_args__ = {"schema": "shared"}
 

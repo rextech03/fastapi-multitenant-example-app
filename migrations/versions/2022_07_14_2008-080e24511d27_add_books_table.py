@@ -1,8 +1,8 @@
-"""Initial
+"""Add Books table
 
-Revision ID: ec23ff43c7b6
-Revises: 
-Create Date: 2021-12-28 18:02:08.341009
+Revision ID: 080e24511d27
+Revises: f3ffe4615512
+Create Date: 2022-07-14 20:08:38.379056
 
 """
 import sqlalchemy as sa
@@ -10,12 +10,10 @@ from alembic import op
 from migrations.tenant import for_each_tenant_schema
 
 # revision identifiers, used by Alembic.
-revision = "ec23ff43c7b6"
-down_revision = None
+revision = "080e24511d27"
+down_revision = "f3ffe4615512"
 branch_labels = None
 depends_on = None
-
-
 
 
 @for_each_tenant_schema

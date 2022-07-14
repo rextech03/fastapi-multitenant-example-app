@@ -1,6 +1,7 @@
 import os
 from contextlib import contextmanager
 from typing import List
+from uuid import uuid4
 
 import alembic  # pylint: disable=E0401
 import alembic.config  # pylint: disable=E0401
@@ -50,13 +51,15 @@ def tenant_create(name: str, schema: str, host: str) -> None:
     with with_db(schema) as db:
         context = MigrationContext.configure(db.connection())
         script = alembic.script.ScriptDirectory.from_config(alembic_config)
+        print("#####", context.get_current_revision(), script.get_current_head())
         if context.get_current_revision() != script.get_current_head():
             raise RuntimeError("Database is not up-to-date. Execute migrations before adding new tenants.")
 
         tenant = Tenant(
+            uuid=uuid4(),
             name=name,
-            host=host,
             schema=schema,
+            schema_header_id=host,
         )
         db.add(tenant)
 
