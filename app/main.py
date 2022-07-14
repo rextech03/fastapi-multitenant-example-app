@@ -20,7 +20,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session, joinedload, relationship, sessionmaker
 
 # from app.api.users import user_router
-from app.schemas.schemas import Book, StandardResponse, User
+from app.schemas.schemas import Book, StandardResponse, User, UserLoginIn, UserLoginOut
 
 # from app.models.models import User
 
@@ -70,6 +70,18 @@ class Roles(Base):
     role_name = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
     role_description = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
     users_FK = relationship("Users", back_populates="role_FK")
+
+
+class SharedUsers(Base):
+    __tablename__ = "shared_users"
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    # uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    email = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True, unique=True)
+    tenant_id = sa.Column(sa.INTEGER(), autoincrement=False, nullable=True)
+    is_active = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    __table_args__ = {"schema": "shared"}
 
 
 class Users(Base):
@@ -122,6 +134,11 @@ def get_tenant(req: Request) -> Tenant:
 
 def get_db(tenant: Tenant = Depends(get_tenant)):
     with with_db(tenant.schema) as db:
+        yield db
+
+
+def get_public_db():
+    with with_db("shared") as db:
         yield db
     # --------------------
 
@@ -286,6 +303,52 @@ def read_user(*, db: Session = Depends(get_db)):
     db.refresh(new_user)
 
     return new_user
+
+
+@app.post("/login")  # , response_model=UserLoginOut
+async def auth_login(*, shared_db: Session = Depends(get_public_db), users: UserLoginIn, req: Request):
+    ua_string = req.headers["User-Agent"]
+    # browser_lang = req.headers["accept-language"]
+
+    try:
+        res = UserLoginIn.from_orm(users)
+
+        db_shared_user = shared_db.execute(
+            select(SharedUsers).where(SharedUsers.email == res.email).where(SharedUsers.is_active == True)
+        ).scalar_one_or_none()
+
+        db_shared_tenant = shared_db.execute(
+            select(Tenant).where(Tenant.id == db_shared_user.tenant_id)
+        ).scalar_one_or_none()
+
+        print("#####", db_shared_user.tenant_id, db_shared_tenant.schema)
+
+        if db_shared_user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        # with db.session.connection(execution_options={"schema_translate_map":{"tenant":tenant_schema}}):
+
+        # ----------------
+        schema_translate_map = dict(tenant=db_shared_tenant.schema)
+        connectable = engine.execution_options(schema_translate_map=schema_translate_map)
+        with Session(autocommit=False, autoflush=False, bind=connectable) as db:
+            db_user = db.execute(select(Users).where(Users.id == 1)).scalar_one_or_none()
+
+        # update_package = {
+        #     "updated_at": datetime.utcnow(),
+        # }
+
+        # for key, value in update_package.items():
+        #     setattr(db_user, key, value)
+        # db.add(db_user)
+        # db.commit()
+        # db.refresh(db_user)
+
+    except Exception as err:
+        print(err)
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return db_user
 
 
 @app.post("/roles")  # , response_model=User

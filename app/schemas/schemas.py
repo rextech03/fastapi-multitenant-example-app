@@ -78,3 +78,25 @@ class User(BaseModel):
     # role_FK: Optional["Roles"] = Relationship(back_populates="users_FK")  # hasOne
     class Config:
         orm_mode = True
+
+
+class UserLoginIn(BaseModel):  # OK
+    email: EmailStr
+    password: str | None
+    permanent: bool
+
+    class Config:
+        orm_mode = True
+
+
+class UserLoginOut(BaseModel):  # OK
+    auth_token: str
+    first_name: str
+    last_name: str
+    tz: str
+    lang: str
+    uuid: UUID
+    role_FK: RoleBasic
+
+    class Config:
+        orm_mode = True
