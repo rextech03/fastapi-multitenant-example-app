@@ -1,4 +1,4 @@
-from app.db import SQLALCHEMY_DATABASE_URL, engine, get_public_db
+from app.db import engine, get_public_db
 from app.models.models import User
 from app.models.shared_models import SharedUser, Tenant
 from app.schemas.schemas import StandardResponse, UserLoginIn, UserLoginOut
