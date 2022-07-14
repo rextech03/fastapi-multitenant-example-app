@@ -9,7 +9,7 @@ class StandardResponse(BaseModel):  # OK
     ok: bool
 
 
-class Book(BaseModel):
+class BookBase(BaseModel):
     __tablename__ = "books"
     id: int | None
     title: str | None
@@ -19,7 +19,7 @@ class Book(BaseModel):
         orm_mode = True
 
 
-class Role(BaseModel):
+class RoleBase(BaseModel):
     __tablename__ = "roles"
     id: int | None
     uuid: UUID
@@ -33,7 +33,7 @@ class Role(BaseModel):
 
     # permission: List["Permissions"] = Relationship(back_populates="role", link_model=RolePermissionLink)  # hasMany
     # users_FK: List["Users"] = Relationship(back_populates="role_FK")  # hasOne
-    users_FK: List["User"]
+    users_FK: List["UserBase"]
 
     class Config:
         orm_mode = True
@@ -47,7 +47,7 @@ class RoleBasic(BaseModel):
         orm_mode = True
 
 
-class User(BaseModel):
+class UserBase(BaseModel):
     __tablename__ = "users"
     id: int
     account_id: int
@@ -72,7 +72,7 @@ class User(BaseModel):
     updated_at: datetime | None
     uuid: UUID
 
-    role_FK: Role
+    role_FK: RoleBase
 
     # usr_FK: List["Tasks"] = Relationship(back_populates="assignee")
     # role_FK: Optional["Roles"] = Relationship(back_populates="users_FK")  # hasOne
