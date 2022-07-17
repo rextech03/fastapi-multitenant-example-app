@@ -1,3 +1,4 @@
+import argparse
 import os
 from contextlib import contextmanager
 from typing import List
@@ -10,6 +11,8 @@ import alembic.runtime.environment  # pylint: disable=E0401
 import alembic.script  # pylint: disable=E0401
 import alembic.util  # pylint: disable=E0401
 import sqlalchemy as sa
+from alembic import command
+from alembic.config import Config
 from alembic.runtime.migration import MigrationContext
 from dotenv import find_dotenv, load_dotenv
 from faker import Faker
@@ -32,6 +35,41 @@ from app.models.shared_models import Tenant
 from app.schemas.schemas import BookBase, StandardResponse
 
 
+def alembic_upgrade_head(tenant_name):
+    # set the paths values
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    package_dir = os.path.normpath(os.path.join(current_dir, ".."))
+    directory = os.path.join(package_dir, "migrations")
+
+    # create Alembic config and feed it with paths
+    config = Config(os.path.join(package_dir, "alembic.ini"))
+    config.set_main_option("script_location", directory.replace("%", "%%"))
+    config.set_main_option("sqlalchemy.url", SQLALCHEMY_DATABASE_URL)
+    config.cmd_opts = argparse.Namespace()  # arguments stub
+
+    # If it is required to pass -x parameters to alembic
+    x_arg = "tenant=" + tenant_name  # "dry_run=" + "True"
+    if not hasattr(config.cmd_opts, "x"):
+        if x_arg is not None:
+            setattr(config.cmd_opts, "x", [])
+            if isinstance(x_arg, list) or isinstance(x_arg, tuple):
+                for x in x_arg:
+                    config.cmd_opts.x.append(x)
+            else:
+                config.cmd_opts.x.append(x_arg)
+        else:
+            setattr(config.cmd_opts, "x", None)
+
+    # prepare and run the command
+    revision = "head"
+    sql = False
+    tag = None
+    # command.stamp(config, revision, sql=sql, tag=tag)
+
+    # upgrade command
+    command.upgrade(config, revision, sql=sql, tag=tag)
+
+
 def _get_alembic_config():
     from alembic.config import Config
 
@@ -49,11 +87,11 @@ alembic_config = _get_alembic_config()
 
 def tenant_create(name: str, schema: str, host: str) -> None:
     with with_db(schema) as db:
-        context = MigrationContext.configure(db.connection())
-        script = alembic.script.ScriptDirectory.from_config(alembic_config)
-        print("#####", context.get_current_revision(), script.get_current_head())
-        if context.get_current_revision() != script.get_current_head():
-            raise RuntimeError("Database is not up-to-date. Execute migrations before adding new tenants.")
+        # context = MigrationContext.configure(db.connection())
+        # script = alembic.script.ScriptDirectory.from_config(alembic_config)
+        # print("#####", context.get_current_revision(), script.get_current_head())
+        # if context.get_current_revision() != script.get_current_head():
+        # raise RuntimeError("Database is not up-to-date. Execute migrations before adding new tenants.")
 
         tenant = Tenant(
             uuid=uuid4(),
@@ -64,7 +102,9 @@ def tenant_create(name: str, schema: str, host: str) -> None:
         db.add(tenant)
 
         db.execute(sa.schema.CreateSchema(schema))
-        get_tenant_specific_metadata().create_all(bind=db.connection())
+        print(schema)
+        alembic_upgrade_head(schema)
+        # get_tenant_specific_metadata().create_all(bind=db.connection())
 
         db.commit()
 
@@ -104,6 +144,12 @@ def read_root():
 def read_item(name: str, schema: str, host: str):
     tenant_create(name, schema, host)
     return {"name": name, "schema": schema, "host": host}
+
+
+@app.get("/upgrade")
+def read_item(name: str, schema: str, host: str):
+    alembic_upgrade_head("f")
+    return {"ok": True}
 
 
 # Books CRUD

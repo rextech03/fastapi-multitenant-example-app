@@ -33,7 +33,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = metadata
+target_metadata = None
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -72,37 +72,29 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-
-    translated = MetaData(naming_convention=metadata.naming_convention)
-
-    def translate_schema(table, to_schema, constraint, referred_schema):
-        # pylint: disable=unused-argument
-        return to_schema
-
-    for table in Base.metadata.tables.values():
-        table.tometadata(
-            translated,
-            schema="tenant_default" if table.schema == "tenant" else table.schema,
-            referred_schema_fn=translate_schema,
-        )
-
     connectable = engine_from_config(
         config.get_section(config.config_ini_section),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
+    current_tenant = context.get_x_argument(as_dictionary=True).get("tenant")
+    dry_run = context.get_x_argument(as_dictionary=True).get("dry_run")
 
     with connectable.connect() as connection:
+        connection.execute("set search_path to %s" % current_tenant)
+        connection.dialect.default_schema_name = current_tenant
+
         context.configure(
             connection=connection,
-            target_metadata=translated,
-            compare_type=True,
-            transaction_per_migration=True,
-            include_schemas=True,
+            target_metadata=target_metadata,
+            version_table_schema=current_tenant,
         )
 
-        with context.begin_transaction():
+        with context.begin_transaction() as transaction:
             context.run_migrations()
+            if bool(dry_run) == True:
+                print("Dry-run succeeded; now rolling back transaction...")
+                transaction.rollback()
 
 
 if context.is_offline_mode():
