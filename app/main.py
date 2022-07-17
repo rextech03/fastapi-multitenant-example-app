@@ -120,27 +120,25 @@ app = FastAPI()
 @app.on_event("startup")
 async def startup():
     logger.info("🚀 Starting up and initializing app...")
-    # with engine.begin() as db:
-    #     context = MigrationContext.configure(db)
-    #     if context.get_current_revision() is not None:
-    #         print("Database already exists.")
-    #         return
-    #
-    #     db.execute(sa.schema.CreateSchema("shared"))
-    #     get_shared_metadata().create_all(bind=db)
-
-    # alembic_config.attributes["connection"] = db
-    # command.stamp(alembic_config, "head", purge=True)
-
-    # db.execute(sa.schema.CreateSchema("shared"))
-    # get_shared_metadata().create_all(bind=db)
-
-    # Base.metadata.create_all(bind=engine)
 
 
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
+
+
+from alembic import op
+from sqlalchemy import engine_from_config
+from sqlalchemy.engine import reflection
+
+
+def _has_table(table_name):
+    config = op.get_context().config
+    engine = engine_from_config(config.get_section(config.config_ini_section), prefix="sqlalchemy.")
+    inspector = reflection.Inspector.from_engine(engine)
+    tables = inspector.get_table_names()
+    print(tables)
+    return table_name in tables
 
 
 @app.get("/create")
@@ -154,7 +152,8 @@ def read_item(name: str, schema: str, host: str):
 
 
 @app.get("/upgrade")
-def read_item(schema: str):
+def upgrade_head(schema: str):
+    # _has_table("a")
     alembic_upgrade_head(schema)
     return {"ok": True}
 

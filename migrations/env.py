@@ -12,20 +12,6 @@ config = context.config
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
-
-load_dotenv("./app/.env")
-section = config.config_ini_section
-config.set_section_option(section, "DB_USER", os.environ.get("DB_USERNAME"))
-config.set_section_option(section, "DB_PASS", os.environ.get("DB_PASSWORD"))
-
-if os.environ.get("APP_ENV") == "local":
-    config.set_section_option(section, "DB_HOST", "localhost")
-else:
-    config.set_section_option(section, "DB_HOST", os.environ.get("DB_HOST"))
-
-config.set_section_option(section, "DB_DATABASE", os.environ.get("DB_DATABASE"))
-
-
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
