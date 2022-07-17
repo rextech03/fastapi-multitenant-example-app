@@ -75,19 +75,19 @@ def alembic_upgrade_head(tenant_name):
         print(traceback.format_exc())
 
 
-def _get_alembic_config():
-    from alembic.config import Config
+# def _get_alembic_config():
+#     from alembic.config import Config
 
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    package_dir = os.path.normpath(os.path.join(current_dir, ".."))
-    directory = os.path.join(package_dir, "migrations")
-    config = Config(os.path.join(package_dir, "alembic.ini"))
-    config.set_main_option("script_location", directory.replace("%", "%%"))  # directory.replace('%', '%%')
-    config.set_main_option("sqlalchemy.url", SQLALCHEMY_DATABASE_URL)
-    return config
+#     current_dir = os.path.dirname(os.path.abspath(__file__))
+#     package_dir = os.path.normpath(os.path.join(current_dir, ".."))
+#     directory = os.path.join(package_dir, "migrations")
+#     config = Config(os.path.join(package_dir, "alembic.ini"))
+#     config.set_main_option("script_location", directory.replace("%", "%%"))  # directory.replace('%', '%%')
+#     config.set_main_option("sqlalchemy.url", SQLALCHEMY_DATABASE_URL)
+#     return config
 
 
-alembic_config = _get_alembic_config()
+# alembic_config = _get_alembic_config()
 
 
 def tenant_create(name: str, schema: str, host: str) -> None:
