@@ -1,5 +1,6 @@
 import argparse
 import os
+import traceback
 from contextlib import contextmanager
 from typing import List
 from uuid import uuid4
@@ -37,37 +38,41 @@ from app.schemas.schemas import BookBase, StandardResponse
 
 def alembic_upgrade_head(tenant_name):
     # set the paths values
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    package_dir = os.path.normpath(os.path.join(current_dir, ".."))
-    directory = os.path.join(package_dir, "migrations")
+    try:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        package_dir = os.path.normpath(os.path.join(current_dir, ".."))
+        directory = os.path.join(package_dir, "migrations")
 
-    # create Alembic config and feed it with paths
-    config = Config(os.path.join(package_dir, "alembic.ini"))
-    config.set_main_option("script_location", directory.replace("%", "%%"))
-    config.set_main_option("sqlalchemy.url", SQLALCHEMY_DATABASE_URL)
-    config.cmd_opts = argparse.Namespace()  # arguments stub
+        # create Alembic config and feed it with paths
+        config = Config(os.path.join(package_dir, "alembic.ini"))
+        config.set_main_option("script_location", directory.replace("%", "%%"))
+        config.set_main_option("sqlalchemy.url", SQLALCHEMY_DATABASE_URL)
+        config.cmd_opts = argparse.Namespace()  # arguments stub
 
-    # If it is required to pass -x parameters to alembic
-    x_arg = "tenant=" + tenant_name  # "dry_run=" + "True"
-    if not hasattr(config.cmd_opts, "x"):
-        if x_arg is not None:
-            setattr(config.cmd_opts, "x", [])
-            if isinstance(x_arg, list) or isinstance(x_arg, tuple):
-                for x in x_arg:
-                    config.cmd_opts.x.append(x)
+        # If it is required to pass -x parameters to alembic
+        x_arg = "tenant=" + tenant_name  # "dry_run=" + "True"
+        if not hasattr(config.cmd_opts, "x"):
+            if x_arg is not None:
+                setattr(config.cmd_opts, "x", [])
+                if isinstance(x_arg, list) or isinstance(x_arg, tuple):
+                    for x in x_arg:
+                        config.cmd_opts.x.append(x)
+                else:
+                    config.cmd_opts.x.append(x_arg)
             else:
-                config.cmd_opts.x.append(x_arg)
-        else:
-            setattr(config.cmd_opts, "x", None)
+                setattr(config.cmd_opts, "x", None)
 
-    # prepare and run the command
-    revision = "head"
-    sql = False
-    tag = None
-    # command.stamp(config, revision, sql=sql, tag=tag)
+        # prepare and run the command
+        revision = "head"
+        sql = False
+        tag = None
+        # command.stamp(config, revision, sql=sql, tag=tag)
 
-    # upgrade command
-    command.upgrade(config, revision, sql=sql, tag=tag)
+        # upgrade command
+        command.upgrade(config, revision, sql=sql, tag=tag)
+    except Exception as e:
+        print(e)
+        print(traceback.format_exc())
 
 
 def _get_alembic_config():
@@ -102,11 +107,9 @@ def tenant_create(name: str, schema: str, host: str) -> None:
         db.add(tenant)
 
         db.execute(sa.schema.CreateSchema(schema))
-        print(schema)
-        alembic_upgrade_head(schema)
-        # get_tenant_specific_metadata().create_all(bind=db.connection())
-
         db.commit()
+
+    # get_tenant_specific_metadata().create_all(bind=db.connection())
 
 
 # -------------------------------------------------------
@@ -142,13 +145,17 @@ def read_root():
 
 @app.get("/create")
 def read_item(name: str, schema: str, host: str):
+    print("OK")
     tenant_create(name, schema, host)
+    print("OK1")
+    # alembic_upgrade_head(schema)
+    # print("OK2")
     return {"name": name, "schema": schema, "host": host}
 
 
 @app.get("/upgrade")
-def read_item(name: str, schema: str, host: str):
-    alembic_upgrade_head("f")
+def read_item(schema: str):
+    alembic_upgrade_head(schema)
     return {"ok": True}
 
 
