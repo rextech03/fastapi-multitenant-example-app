@@ -36,7 +36,7 @@ from app.models.shared_models import Tenant
 from app.schemas.schemas import BookBase, StandardResponse
 
 
-def alembic_upgrade_head(tenant_name):
+def alembic_upgrade_head(tenant_name, revision="head"):
     # set the paths values
     try:
         current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -65,7 +65,7 @@ def alembic_upgrade_head(tenant_name):
                 setattr(config.cmd_opts, "x", None)
 
         # prepare and run the command
-        revision = "head"
+        revision = revision
         sql = False
         tag = None
         # command.stamp(config, revision, sql=sql, tag=tag)
@@ -122,6 +122,8 @@ app = FastAPI()
 @app.on_event("startup")
 async def startup():
     logger.info("🚀 Starting up and initializing app...")
+    alembic_upgrade_head("public", "d6ba8c13303e")
+    logger.info("🚀 Starting up and initializing app... DONE")
 
 
 @app.get("/")
@@ -132,15 +134,6 @@ def read_root():
 from alembic import op
 from sqlalchemy import engine_from_config
 from sqlalchemy.engine import reflection
-
-
-def _has_table(table_name):
-    config = op.get_context().config
-    engine = engine_from_config(config.get_section(config.config_ini_section), prefix="sqlalchemy.")
-    inspector = reflection.Inspector.from_engine(engine)
-    tables = inspector.get_table_names()
-    print(tables)
-    return table_name in tables
 
 
 @app.get("/create")

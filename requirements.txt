@@ -25,6 +25,7 @@ sniffio==1.2.0; python_version >= "3.6" and python_full_version >= "3.6.2"
 sqlalchemy==1.4.39; (python_version >= "2.7" and python_full_version < "3.0.0") or (python_full_version >= "3.6.0")
 starlette==0.19.1; python_version >= "3.6" and python_full_version >= "3.6.1"
 typeguard==2.13.3; python_full_version >= "3.5.3"
+typer==0.6.1; python_version >= "3.6"
 typing-extensions==4.3.0; python_version >= "3.7" and python_full_version >= "3.6.1"
 urllib3==1.26.10; python_version >= "3.7" and python_full_version < "3.0.0" and python_version < "4" or python_full_version >= "3.6.0" and python_version < "4" and python_version >= "3.7"
 uvicorn==0.18.2; python_version >= "3.7"
