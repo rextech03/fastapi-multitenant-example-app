@@ -19,7 +19,7 @@ class Tenant(Base):
     schema = sa.Column(sa.String(128), nullable=True)
     schema_header_id = sa.Column("schema_header_id", sa.String(128), nullable=True)
 
-    __table_args__ = {"schema": "shared"}
+    __table_args__ = {"schema": "public"}
 
 
 class SharedUser(Base):
@@ -31,4 +31,4 @@ class SharedUser(Base):
     is_active = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
-    __table_args__ = {"schema": "shared"}
+    __table_args__ = {"schema": "public"}

@@ -13,6 +13,7 @@ ENV PYTHONUNBUFFERED 1
 COPY ./requirements.txt /requirements.txt
 
 RUN pip install --no-cache-dir --upgrade -r /requirements.txt
+# EXPOSE 80
 
 #USER alex
 COPY --chown=alex:alex ./migrations /src/migrations

@@ -1,16 +1,16 @@
-"""Initial
+"""Initial Tenant Tables
 
-Revision ID: 04e33b919cf7
-Revises: 
-Create Date: 2022-07-15 15:46:40.927592
+Revision ID: 43de4e824162
+Revises: d6ba8c13303e
+Create Date: 2022-07-18 16:18:40.239282
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "04e33b919cf7"
-down_revision = None
+revision = "43de4e824162"
+down_revision = "d6ba8c13303e"
 branch_labels = None
 depends_on = None
 

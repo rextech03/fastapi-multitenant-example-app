@@ -43,6 +43,8 @@ def alembic_upgrade_head(tenant_name):
         package_dir = os.path.normpath(os.path.join(current_dir, ".."))
         directory = os.path.join(package_dir, "migrations")
 
+        print("D:", directory)
+
         # create Alembic config and feed it with paths
         config = Config(os.path.join(package_dir, "alembic.ini"))
         config.set_main_option("script_location", directory.replace("%", "%%"))
