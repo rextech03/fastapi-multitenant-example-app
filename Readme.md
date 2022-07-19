@@ -30,6 +30,15 @@ Rollback migracji
 alembic downgrade -1
 ```
 
+### pyTest
+```bash
+(.venv) fastapi-multitenant-example-app$ coverage run -m pytest -v tests && coverage report -m
+```
+
+```bash
+coverage html
+```
+
 ### Postgres
 
 ```sql

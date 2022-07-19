@@ -168,7 +168,7 @@ async def startup():
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World", "URL": os.environ.get("DATABASE_TEST_URL")}
+    return {"Hello": "World"}
 
 
 from alembic import op
