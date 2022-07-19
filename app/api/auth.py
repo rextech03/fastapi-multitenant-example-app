@@ -32,7 +32,7 @@ async def auth_login(*, shared_db: Session = Depends(get_public_db), users: User
         # ----------------
         schema_translate_map = dict(tenant=db_shared_tenant.schema)
         connectable = engine.execution_options(schema_translate_map=schema_translate_map)
-        with Session(autocommit=False, autoflush=False, bind=connectable) as db:
+        with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
             db_user = db.execute(select(User).where(User.id == 1)).scalar_one_or_none()
 
     except Exception as err:

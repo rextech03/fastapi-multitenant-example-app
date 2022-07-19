@@ -22,7 +22,6 @@ db_database = settings.db_name
 SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://{db_user}:{db_password}@{db_host}:5438/{db_database}"
 engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True, pool_pre_ping=True, pool_recycle=280)
 
-
 metadata = sa.MetaData(schema="tenant")
 Base = declarative_base(metadata=metadata)
 
@@ -50,18 +49,23 @@ class TenantNotFoundError(Exception):
 
 
 def get_tenant(req: Request) -> Tenant:
-    host_without_port = req.headers["host"].split(":", 1)[0]
+    try:
+        host_without_port = req.headers["host"].split(":", 1)[0]
 
-    with with_db(None) as db:
-        tenant = db.execute(select(Tenant).where(Tenant.host == host_without_port)).scalar_one_or_none()
+        with with_db(None) as db:
+            tenant = db.execute(
+                select(Tenant).where(Tenant.schema_header_id == host_without_port)
+            ).scalar_one_or_none()
 
-    if tenant is None:
-        raise TenantNotFoundError(host_without_port)
-
+        if tenant is None:
+            raise TenantNotFoundError(host_without_port)
+    except Exception as e:
+        print(e)
     return tenant
 
 
 def get_db(tenant: Tenant = Depends(get_tenant)):
+    print("tenant.schema", tenant.schema)
     with with_db(tenant.schema) as db:
         yield db
 
@@ -80,7 +84,6 @@ def with_db(tenant_schema: Optional[str]):
         schema_translate_map = None
 
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
-
     try:
         db = Session(autocommit=False, autoflush=False, bind=connectable)
         yield db

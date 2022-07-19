@@ -18,6 +18,7 @@ from alembic.runtime.migration import MigrationContext
 from dotenv import find_dotenv, load_dotenv
 from faker import Faker
 from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 from sqlalchemy import select
 from sqlalchemy.ext.declarative import declarative_base
@@ -34,6 +35,8 @@ from app.db import (
 from app.models.models import Book
 from app.models.shared_models import Tenant
 from app.schemas.schemas import BookBase, StandardResponse
+
+logger.add("logs.log", format="{time} - {level} - {message}", level="DEBUG", backtrace=False, diagnose=True)
 
 
 def alembic_upgrade_head(tenant_name, revision="head"):
@@ -93,12 +96,16 @@ def alembic_upgrade_head(tenant_name, revision="head"):
 
 
 def tenant_create(name: str, schema: str, host: str) -> None:
-    with with_db(schema) as db:
+
+    with with_db("public") as db:
         # context = MigrationContext.configure(db.connection())
         # script = alembic.script.ScriptDirectory.from_config(alembic_config)
         # print("#####", context.get_current_revision(), script.get_current_head())
         # if context.get_current_revision() != script.get_current_head():
         # raise RuntimeError("Database is not up-to-date. Execute migrations before adding new tenants.")
+        db_tenant = db.execute(select(Tenant).where(Tenant.schema == schema)).scalar_one_or_none()
+        if db_tenant is not None:
+            raise HTTPException(status_code=404, detail="Tenant already exists!")
 
         tenant = Tenant(
             uuid=uuid4(),
@@ -107,7 +114,6 @@ def tenant_create(name: str, schema: str, host: str) -> None:
             schema_header_id=host,
         )
         db.add(tenant)
-
         db.execute(sa.schema.CreateSchema(schema))
         db.commit()
 
@@ -116,7 +122,41 @@ def tenant_create(name: str, schema: str, host: str) -> None:
 
 # -------------------------------------------------------
 
-app = FastAPI()
+origins = ["http://localhost", "http://localhost:8080", "*"]
+
+
+def create_application() -> FastAPI:
+    """
+    Create base FastAPI app with CORS middlewares and routes loaded
+    Returns:
+        FastAPI: [description]
+    """
+    app = FastAPI()
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    app.include_router(
+        auth_router,
+        prefix="/auth",
+        tags=["USER"],
+    )
+
+    app.include_router(
+        user_router,
+        prefix="/users",
+        tags=["USER"],
+    )
+
+    return app
+
+
+app = create_application()
 
 
 @app.on_event("startup")
@@ -128,7 +168,7 @@ async def startup():
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}
+    return {"Hello": "World", "URL": os.environ.get("DATABASE_TEST_URL")}
 
 
 from alembic import op
@@ -156,17 +196,18 @@ def upgrade_head(schema: str):
 # Books CRUD
 
 
-@app.get("/books", response_model=List[BookBase])  #
-def read_user(*, db: Session = Depends(get_db)):
-    db_book = db.execute(select(Book)).scalars().all()
-    if db_book is None:
-        raise HTTPException(status_code=404, detail="Book not found")
+@app.get("/books")  # , response_model=List[BookBase]
+# @logger.catch()
+def read_user(*, session: Session = Depends(get_db)):
+    db_book = session.execute(select(Book)).scalars().all()
+    # if db_book is None:
+    #     raise HTTPException(status_code=403, detail="Book not found")
     return db_book
 
 
 @app.get("/books/{book_id}", response_model=BookBase)  #
-def read_user(*, db: Session = Depends(get_db), book_id: int):
-    db_book = db.execute(select(Book).where(Book.id == book_id)).scalar_one_or_none()
+def read_user(*, session: Session = Depends(get_db), book_id: int):
+    db_book = session.execute(select(Book).where(Book.id == book_id)).scalar_one_or_none()
     if db_book is None:
         raise HTTPException(status_code=404, detail="Book not found")
     return db_book
@@ -196,16 +237,3 @@ def read_user(*, db: Session = Depends(get_db), book_id: int):
     db.commit()
 
     return {"ok": True}
-
-
-app.include_router(
-    auth_router,
-    prefix="/auth",
-    tags=["USER"],
-)
-
-app.include_router(
-    user_router,
-    prefix="/users",
-    tags=["USER"],
-)

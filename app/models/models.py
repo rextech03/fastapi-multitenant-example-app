@@ -74,7 +74,7 @@ class Role(Base):
     id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     role_name = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
     role_description = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
-    users_FK = relationship("Users", back_populates="role_FK")
+    users_FK = relationship("User", back_populates="role_FK")
 
 
 class User(Base):
@@ -88,4 +88,4 @@ class User(Base):
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
-    role_FK = relationship("Roles", back_populates="users_FK")
+    role_FK = relationship("Role", back_populates="users_FK")
