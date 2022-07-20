@@ -18,14 +18,14 @@ from alembic.config import Config
 from app.config import Settings
 from app.db import get_db
 from app.main import alembic_upgrade_head, app, tenant_create
+from commands import first_migration
 from dotenv import load_dotenv
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-
-def get_settings_override():
-    return Settings(testing=1, db_testing='os.environ.get("DATABASE_TEST_URL")')
+# def get_settings_override():
+#     return Settings(testing=1, db_testing='os.environ.get("DATABASE_TEST_URL")')
 
 
 # @pytest.fixture
@@ -35,6 +35,16 @@ def get_settings_override():
 #     os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
 #     os.environ["AWS_SECURITY_TOKEN"] = "testing"
 #     os.environ["AWS_SESSION_TOKEN"] = "testing"
+
+
+@pytest.fixture(scope="session")
+def apply_migrations():
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
+    os.environ["TESTING"] = "1"
+
+    first_migration()
+    yield
+    # alembic.command.downgrade(config, "base")
 
 
 @pytest.fixture(name="session")
