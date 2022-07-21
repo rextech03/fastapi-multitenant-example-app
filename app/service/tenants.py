@@ -17,9 +17,10 @@ def alembic_upgrade_head(tenant_name, revision="head"):
     # set the paths values
     try:
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        package_dir = os.path.normpath(os.path.join(current_dir, "..", ".."))  # TODO find more reliable way
+        package_dir = os.path.normpath(os.path.join(current_dir, "..", ".."))  # TODO find better way: str(Path.cwd())
         directory = os.path.join(package_dir, "migrations")
 
+        print("D:", current_dir)
         print("D:", directory)
 
         # create Alembic config and feed it with paths

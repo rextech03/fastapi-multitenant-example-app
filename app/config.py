@@ -34,16 +34,16 @@ class Settings(BaseSettings):
     # TEST_SQLALCHEMY_DATABASE_URI: str = ""
     TEST_SQLALCHEMY_DATABASE_URI: str = os.getenv("DATABASE_TEST_URL")
 
-    @validator("DEFAULT_SQLALCHEMY_DATABASE_URI")
-    def _assemble_default_db_connection(cls, v: str, values: dict[str, str]) -> str:
-        return PostgresDsn.build(
-            scheme="postgresql+psycopg2",
-            user=values["DEFAULT_DATABASE_USER"],
-            password=values["DEFAULT_DATABASE_PASSWORD"],
-            host=values["DEFAULT_DATABASE_HOSTNAME"],
-            port=values["DEFAULT_DATABASE_PORT"],
-            path=f"/{values['DEFAULT_DATABASE_DB']}",
-        )
+    # @validator("DEFAULT_SQLALCHEMY_DATABASE_URI")
+    # def _assemble_default_db_connection(cls, v: str, values: dict[str, str]) -> str:
+    #     return PostgresDsn.build(
+    #         scheme="postgresql+psycopg2",
+    #         user=values["DEFAULT_DATABASE_USER"],
+    #         password=values["DEFAULT_DATABASE_PASSWORD"],
+    #         host=values["DEFAULT_DATABASE_HOSTNAME"],
+    #         port=values["DEFAULT_DATABASE_PORT"],
+    #         path=f"/{values['DEFAULT_DATABASE_DB']}",
+    #     )
 
     class Config:
         env_prefix = ""
