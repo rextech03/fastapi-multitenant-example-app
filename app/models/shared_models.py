@@ -40,3 +40,18 @@ class PublicUser(Base):
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     __table_args__ = {"schema": "public"}
+
+
+class PublicCompany(Base):
+    __tablename__ = "public_companies"
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    name = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True, unique=True)
+    short_name = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True, unique=True)
+    nip = sa.Column(sa.VARCHAR(length=16), autoincrement=False, nullable=True, unique=True)
+    country = sa.Column(sa.VARCHAR(length=128), autoincrement=False, nullable=True, unique=True)
+    city = sa.Column(sa.VARCHAR(length=128), autoincrement=False, nullable=True, unique=True)
+    qr_id = sa.Column(sa.VARCHAR(length=32), autoincrement=False, nullable=True, unique=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    __table_args__ = {"schema": "public"}

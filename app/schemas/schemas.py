@@ -9,6 +9,14 @@ class StandardResponse(BaseModel):  # OK
     ok: bool
 
 
+class PubliCompanyAdd(BaseModel):  # OK
+    name: str
+    short_name: str
+    nip: str
+    country: str
+    city: str
+
+
 class BookBase(BaseModel):
     __tablename__ = "books"
     id: int | None
@@ -76,18 +84,6 @@ class UserBase(BaseModel):
 
     # usr_FK: List["Tasks"] = Relationship(back_populates="assignee")
     # role_FK: Optional["Roles"] = Relationship(back_populates="users_FK")  # hasOne
-    class Config:
-        orm_mode = True
-
-
-class UserRegisterIn(BaseModel):  # OK
-    email: EmailStr
-    password: str
-    password_confirmation: str
-    tos: bool
-    tz: str | None = "Europe/Warsaw"
-    lang: str | None = "pl"
-
     class Config:
         orm_mode = True
 

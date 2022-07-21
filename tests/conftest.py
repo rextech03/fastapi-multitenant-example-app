@@ -25,7 +25,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 # def get_settings_override():
-#     return Settings(testing=1, db_testing='os.environ.get("DATABASE_TEST_URL")')
+#     return Settings(testing=1, TEST_SQLALCHEMY_DATABASE_URI='os.environ.get("DATABASE_TEST_URL")')
 
 
 # @pytest.fixture
@@ -50,14 +50,14 @@ def apply_migrations():
 @pytest.fixture(name="session")
 def session_fixture():
     load_dotenv("./app/.env")
-    db_user = os.getenv("DB_USERNAME")
-    db_host: str = os.getenv("DB_HOST")
-    db_name: str = os.getenv("DB_DATABASE")
-    db_user: str = os.getenv("DB_USERNAME")
-    db_password: str = os.getenv("DB_PASSWORD")
+    DEFAULT_DATABASE_USER = os.getenv("DB_USERNAME")
+    DEFAULT_DATABASE_HOSTNAME: str = os.getenv("DB_HOST")
+    DEFAULT_DATABASE_DB: str = os.getenv("DB_DATABASE")
+    DEFAULT_DATABASE_USER: str = os.getenv("DB_USERNAME")
+    DEFAULT_DATABASE_PASSWORD: str = os.getenv("DB_PASSWORD")
 
     engine = create_engine(
-        f"postgresql+psycopg2://{db_user}:{db_password}@{db_host}:5438/{db_name}",
+        f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD}@{DEFAULT_DATABASE_HOSTNAME}:5438/{DEFAULT_DATABASE_DB}",
         echo=True,
         pool_pre_ping=True,
         pool_recycle=280,

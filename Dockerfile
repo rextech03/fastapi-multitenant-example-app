@@ -19,6 +19,7 @@ RUN pip install --no-cache-dir --upgrade -r /requirements.txt
 COPY --chown=alex:alex ./migrations /src/migrations
 COPY --chown=alex:alex ./alembic.ini /src/alembic.ini
 COPY --chown=alex:alex ./app /src/app
+COPY --chown=alex:alex ./tests/api_responses /src/tests/api_responses
 
 
 WORKDIR /src

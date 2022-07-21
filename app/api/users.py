@@ -19,10 +19,10 @@ user_router = APIRouter()
 
 @user_router.get("/")
 async def user_get_all(*, db: Session = Depends(get_db)):
-    db_user = db.execute(select(User)).scalars().all()
-    if db_user is None:
+    DEFAULT_DATABASE_USER = db.execute(select(User)).scalars().all()
+    if DEFAULT_DATABASE_USER is None:
         raise HTTPException(status_code=404, detail="Book not found")
-    return db_user
+    return DEFAULT_DATABASE_USER
 
 
 @user_router.post("/")  # , response_model=User

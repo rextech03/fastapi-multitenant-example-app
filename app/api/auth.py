@@ -1,11 +1,14 @@
+from datetime import datetime, timedelta
+
 from app.crud import crud_auth
 from app.db import engine, get_public_db
 from app.models.models import User
 from app.models.shared_models import PublicUser, Tenant
-from app.schemas.requests import UserRegisterIn
+from app.schemas.requests import UserFirstRunIn, UserRegisterIn
 from app.schemas.responses import StandardResponse
 from app.schemas.schemas import UserLoginIn, UserLoginOut
 from app.service import auth
+from app.service.api_rejestr_io import get_company_details
 from app.service.password import Password
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select
@@ -38,33 +41,83 @@ async def auth_register(*, shared_db: Session = Depends(get_public_db), user: Us
     return {"ok": True}
 
 
-@auth_router.post("/login")  # , response_model=UserLoginOut
-async def auth_login(*, shared_db: Session = Depends(get_public_db), users: UserLoginIn, req: Request):
-    ua_string = req.headers["User-Agent"]
-    # browser_lang = req.headers["accept-language"]
+@auth_router.post("/first_run")
+async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: UserFirstRunIn):
+    """Activate user based on service token"""
 
-    try:
-        res = UserLoginIn.from_orm(users)
+    if auth.is_nip_correct(user.nip):  # 123-456-32-18
+        raise HTTPException(status_code=400, detail="Invalid NIP number")
 
-        db_shared_user = shared_db.execute(
-            select(PublicUser).where(PublicUser.email == res.email).where(PublicUser.is_active == True)
-        ).scalar_one_or_none()
-
-        db_shared_tenant = shared_db.execute(
-            select(Tenant).where(Tenant.id == db_shared_user.tenant_id)
-        ).scalar_one_or_none()
-
-        if db_shared_user is None:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        # ----------------
-        schema_translate_map = dict(tenant=db_shared_tenant.schema)
-        connectable = engine.execution_options(schema_translate_map=schema_translate_map)
-        with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
-            db_user = db.execute(select(User).where(User.id == 1)).scalar_one_or_none()
-
-    except Exception as err:
-        print(err)
+    db_user = crud_auth.get_user_by_service_token(shared_db, user.token)
+    if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    return db_user
+    db_company = crud_auth.get_company_by_nip(shared_db, user.nip)
+    user_role_id = 2  # SUPER_ADMIN[1] / USER[2] / VIEWER[3]
+    is_verified = False
+
+    if not db_company:
+        company_data = get_company_details(user.nip)
+        db_company = crud_auth.create_public_company(shared_db, company_data)
+        user_role_id = 1  # SUPER_ADMIN[1] / USER[2] / VIEWER[3]
+        is_verified = True
+
+    update_package = {
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "is_active": True,
+        "is_verified": is_verified,
+        "user_role_id": user_role_id,
+        "service_token": None,
+        "service_token_valid_to": None,
+        "updated_at": datetime.utcnow(),
+    }
+
+    for key, value in update_package.items():
+        setattr(db_user, key, value)
+    shared_db.add(db_user)
+    shared_db.commit()
+    shared_db.refresh(db_user)
+
+    # return {
+    #     "ok": True,
+    #     "first_name": db_user.first_name,
+    #     "last_name": db_user.last_name,
+    #     "lang": db_user.lang,
+    #     "tz": db_user.tz,
+    #     "uuid": db_user.uuid,
+    #     "token": token,
+    # }
+    return data
+
+
+# @auth_router.post("/login")  # , response_model=UserLoginOut
+# async def auth_login(*, shared_db: Session = Depends(get_public_db), users: UserLoginIn, req: Request):
+#     ua_string = req.headers["User-Agent"]
+#     # browser_lang = req.headers["accept-language"]
+
+#     try:
+#         res = UserLoginIn.from_orm(users)
+
+#         db_shared_user = shared_db.execute(
+#             select(PublicUser).where(PublicUser.email == res.email).where(PublicUser.is_active == True)
+#         ).scalar_one_or_none()
+
+#         db_shared_tenant = shared_db.execute(
+#             select(Tenant).where(Tenant.id == db_shared_user.tenant_id)
+#         ).scalar_one_or_none()
+
+#         if db_shared_user is None:
+#             raise HTTPException(status_code=404, detail="User not found")
+
+#         # ----------------
+#         schema_translate_map = dict(tenant=db_shared_tenant.schema)
+#         connectable = engine.execution_options(schema_translate_map=schema_translate_map)
+#         with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
+#             db_user = db.execute(select(User).where(User.id == 1)).scalar_one_or_none()
+
+#     except Exception as err:
+#         print(err)
+#         raise HTTPException(status_code=404, detail="User not found")
+
+#     return db_user

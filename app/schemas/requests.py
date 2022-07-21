@@ -13,3 +13,10 @@ class UserRegisterIn(BaseRequest):  # OK
     tos: bool
     tz: str | None = "Europe/Warsaw"
     lang: str | None = "pl"
+
+
+class UserFirstRunIn(BaseRequest):  # OK
+    first_name: str
+    last_name: str
+    nip: str
+    token: str
