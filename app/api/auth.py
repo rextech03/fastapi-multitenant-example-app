@@ -2,6 +2,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from unidecode import unidecode
 
 from app.crud import crud_auth
 from app.db import get_public_db
@@ -10,6 +11,7 @@ from app.schemas.responses import StandardResponse
 from app.service import auth
 from app.service.api_rejestr_io import get_company_details
 from app.service.password import Password
+from app.service.tenants import alembic_upgrade_head, tenant_create
 
 auth_router = APIRouter()
 
@@ -58,7 +60,12 @@ async def auth_first_run(
 
     if not db_company:
         company_data = get_company_details(user.nip)
+        print("#####")
         db_company = crud_auth.create_public_company(shared_db, company_data)
+        tenanat_id = unidecode(db_company.short_name).lower()
+
+        tenant_create(tenanat_id, tenanat_id, tenanat_id)
+        alembic_upgrade_head(tenanat_id)
         user_role_id = 1  # SUPER_ADMIN[1] / USER[2] / VIEWER[3]
         is_verified = True
 

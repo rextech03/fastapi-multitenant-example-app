@@ -68,18 +68,20 @@ def create_public_user(db: Session, user: UserRegisterIn):
 
 
 def create_public_company(db: Session, company: PubliCompanyAdd):
-    new_company = PublicCompany(
-        uuid=str(uuid4()),
-        name=company.name,
-        short_name=company.short_name,
-        nip=company.nip,
-        country=company.country,
-        city=company.city,
-        qr_id=generate_qr_id(company.nip),
-    )
+    try:
+        new_company = PublicCompany(
+            uuid=str(uuid4()),
+            name=company["name"],
+            short_name=company["short_name"],
+            nip=company["nip"],
+            country=company["country"],
+            city=company["city"],
+            qr_id=generate_qr_id(db, company["nip"]),
+        )
 
-    db.add(new_company)
-    db.commit()
-    db.refresh(new_company)
-
+        db.add(new_company)
+        db.commit()
+        db.refresh(new_company)
+    except Exception as e:
+        print(e)
     return new_company

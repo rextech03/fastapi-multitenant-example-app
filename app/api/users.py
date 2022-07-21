@@ -1,11 +1,12 @@
 from datetime import datetime
 
-from app.db import get_db
-from app.models.models import User
 from faker import Faker
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+
+from app.db import get_db
+from app.models.models import User
 
 user_router = APIRouter()
 

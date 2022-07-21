@@ -18,5 +18,5 @@ class UserRegisterIn(BaseRequest):  # OK
 class UserFirstRunIn(BaseRequest):  # OK
     first_name: str
     last_name: str
-    nip: str
+    nip: str = "1234563218"
     token: str
