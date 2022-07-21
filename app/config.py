@@ -1,9 +1,8 @@
 import os
 from functools import lru_cache
-from pathlib import Path
 from typing import Literal
 
-from pydantic import AnyHttpUrl, BaseSettings, EmailStr, PostgresDsn, validator
+from pydantic import BaseSettings
 
 # PROJECT_DIR = Path(__file__).parent.parent
 

@@ -1,25 +1,23 @@
-from datetime import datetime, timedelta
+from datetime import datetime
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
 from app.crud import crud_auth
-from app.db import engine, get_public_db
-from app.models.models import User
-from app.models.shared_models import PublicUser, Tenant
+from app.db import get_public_db
 from app.schemas.requests import UserFirstRunIn, UserRegisterIn
 from app.schemas.responses import StandardResponse
-from app.schemas.schemas import UserLoginIn, UserLoginOut
 from app.service import auth
 from app.service.api_rejestr_io import get_company_details
 from app.service.password import Password
-from fastapi import APIRouter, Depends, HTTPException, Request
-from sqlalchemy import select
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session
 
 auth_router = APIRouter()
 
 
 @auth_router.post("/register", response_model=StandardResponse)
-async def auth_register(*, shared_db: Session = Depends(get_public_db), user: UserRegisterIn):
+async def auth_register(
+    *, shared_db: Session = Depends(get_public_db), user: UserRegisterIn
+):
 
     if auth.is_email_temporary(user.email):
         raise HTTPException(status_code=400, detail="Temporary email not allowed")
@@ -42,7 +40,9 @@ async def auth_register(*, shared_db: Session = Depends(get_public_db), user: Us
 
 
 @auth_router.post("/first_run")
-async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: UserFirstRunIn):
+async def auth_first_run(
+    *, shared_db: Session = Depends(get_public_db), user: UserFirstRunIn
+):
     """Activate user based on service token"""
 
     if auth.is_nip_correct(user.nip):  # 123-456-32-18

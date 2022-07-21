@@ -1,4 +1,6 @@
-from sqlalchemy import Boolean, Column, DateTime, ForeignKeyConstraint, Identity, Integer, JSON, PrimaryKeyConstraint, String, Table, Text, Time, UniqueConstraint, text
+from sqlalchemy import (JSON, Boolean, Column, DateTime, ForeignKeyConstraint,
+                        Identity, Integer, PrimaryKeyConstraint, String, Table,
+                        Text, Time, UniqueConstraint, text)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import declarative_base, relationship
 
@@ -7,13 +9,18 @@ metadata = Base.metadata
 
 
 class Accounts(Base):
-    __tablename__ = 'accounts'
+    __tablename__ = "accounts"
     __table_args__ = (
-        PrimaryKeyConstraint('id', name='accounts_pkey'),
-        UniqueConstraint('uuid', name='accounts_uuid_key')
+        PrimaryKeyConstraint("id", name="accounts_pkey"),
+        UniqueConstraint("uuid", name="accounts_uuid_key"),
     )
 
-    id = Column(Integer, Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1))
+    id = Column(
+        Integer,
+        Identity(
+            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
+        ),
+    )
     uuid = Column(UUID)
     company = Column(String(256))
     registered_at = Column(DateTime(True))
@@ -28,28 +35,40 @@ class Accounts(Base):
 
 
 class Comments(Base):
-    __tablename__ = 'comments'
+    __tablename__ = "comments"
     __table_args__ = (
-        PrimaryKeyConstraint('id', name='comments_pkey'),
-        UniqueConstraint('uuid', name='comments_uuid_key')
+        PrimaryKeyConstraint("id", name="comments_pkey"),
+        UniqueConstraint("uuid", name="comments_uuid_key"),
     )
 
-    id = Column(Integer, Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1))
+    id = Column(
+        Integer,
+        Identity(
+            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
+        ),
+    )
     uuid = Column(UUID)
     message = Column(String(1024))
     user_id = Column(Integer)
 
-    task = relationship('Tasks', secondary='task_comments_link', back_populates='comment')
+    task = relationship(
+        "Tasks", secondary="task_comments_link", back_populates="comment"
+    )
 
 
 class Events(Base):
-    __tablename__ = 'events'
+    __tablename__ = "events"
     __table_args__ = (
-        PrimaryKeyConstraint('id', name='events_pkey'),
-        UniqueConstraint('uuid', name='events_uuid_key')
+        PrimaryKeyConstraint("id", name="events_pkey"),
+        UniqueConstraint("uuid", name="events_uuid_key"),
     )
 
-    id = Column(Integer, Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1))
+    id = Column(
+        Integer,
+        Identity(
+            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
+        ),
+    )
     uuid = Column(UUID)
     account_id = Column(Integer)
     recurring = Column(Boolean)
@@ -70,16 +89,19 @@ class Events(Base):
     time_to = Column(Time)
     duration = Column(Integer)
 
-    task = relationship('Tasks', secondary='task_events_link', back_populates='event')
+    task = relationship("Tasks", secondary="task_events_link", back_populates="event")
 
 
 class Files(Base):
-    __tablename__ = 'files'
-    __table_args__ = (
-        PrimaryKeyConstraint('id', name='files_pkey'),
-    )
+    __tablename__ = "files"
+    __table_args__ = (PrimaryKeyConstraint("id", name="files_pkey"),)
 
-    id = Column(Integer, Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1))
+    id = Column(
+        Integer,
+        Identity(
+            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
+        ),
+    )
     uuid = Column(UUID)
     account_id = Column(Integer)
     owner_id = Column(Integer)
@@ -91,23 +113,28 @@ class Files(Base):
     created_at = Column(DateTime(True))
     updated_at = Column(DateTime(True))
 
-    idea = relationship('Ideas', secondary='ideas_files_link', back_populates='file')
-    task = relationship('Tasks', secondary='task_files_link', back_populates='file')
+    idea = relationship("Ideas", secondary="ideas_files_link", back_populates="file")
+    task = relationship("Tasks", secondary="task_files_link", back_populates="file")
 
 
 class Ideas(Base):
-    __tablename__ = 'ideas'
+    __tablename__ = "ideas"
     __table_args__ = (
-        PrimaryKeyConstraint('id', name='ideas_pkey'),
-        UniqueConstraint('uuid', name='ideas_uuid_key')
+        PrimaryKeyConstraint("id", name="ideas_pkey"),
+        UniqueConstraint("uuid", name="ideas_uuid_key"),
     )
 
-    id = Column(Integer, Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1))
+    id = Column(
+        Integer,
+        Identity(
+            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
+        ),
+    )
     uuid = Column(UUID)
     account_id = Column(Integer)
     author_id = Column(Integer)
-    upvotes = Column(Integer, server_default=text('0'))
-    downvotes = Column(Integer, server_default=text('0'))
+    upvotes = Column(Integer, server_default=text("0"))
+    downvotes = Column(Integer, server_default=text("0"))
     title = Column(String(256))
     description = Column(Text)
     color = Column(String(8))
@@ -116,16 +143,19 @@ class Ideas(Base):
     deleted_at = Column(DateTime(True))
     status = Column(String(32))
 
-    file = relationship('Files', secondary='ideas_files_link', back_populates='idea')
+    file = relationship("Files", secondary="ideas_files_link", back_populates="idea")
 
 
 class IdeasVotes(Base):
-    __tablename__ = 'ideas_votes'
-    __table_args__ = (
-        PrimaryKeyConstraint('id', name='ideas_votes_pkey'),
-    )
+    __tablename__ = "ideas_votes"
+    __table_args__ = (PrimaryKeyConstraint("id", name="ideas_votes_pkey"),)
 
-    id = Column(Integer, Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1))
+    id = Column(
+        Integer,
+        Identity(
+            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
+        ),
+    )
     uuid = Column(UUID)
     account_id = Column(Integer)
     idea_id = Column(Integer)
@@ -135,12 +165,15 @@ class IdeasVotes(Base):
 
 
 class LoginHistory(Base):
-    __tablename__ = 'login_history'
-    __table_args__ = (
-        PrimaryKeyConstraint('id', name='login_history_pkey'),
-    )
+    __tablename__ = "login_history"
+    __table_args__ = (PrimaryKeyConstraint("id", name="login_history_pkey"),)
 
-    id = Column(Integer, Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1))
+    id = Column(
+        Integer,
+        Identity(
+            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
+        ),
+    )
     login_date = Column(DateTime(True), nullable=False)
     failed = Column(Boolean, nullable=False)
     account_id = Column(Integer)
@@ -155,13 +188,18 @@ class LoginHistory(Base):
 
 
 class Permissions(Base):
-    __tablename__ = 'permissions'
+    __tablename__ = "permissions"
     __table_args__ = (
-        PrimaryKeyConstraint('id', name='permissions_pkey'),
-        UniqueConstraint('uuid', name='permissions_uuid_key')
+        PrimaryKeyConstraint("id", name="permissions_pkey"),
+        UniqueConstraint("uuid", name="permissions_uuid_key"),
     )
 
-    id = Column(Integer, Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1))
+    id = Column(
+        Integer,
+        Identity(
+            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
+        ),
+    )
     uuid = Column(UUID)
     account_id = Column(Integer)
     name = Column(String(100))
@@ -171,17 +209,24 @@ class Permissions(Base):
     created_at = Column(DateTime(True))
     updated_at = Column(DateTime(True))
 
-    role = relationship('Roles', secondary='roles_permissions_link', back_populates='permission')
+    role = relationship(
+        "Roles", secondary="roles_permissions_link", back_populates="permission"
+    )
 
 
 class Roles(Base):
-    __tablename__ = 'roles'
+    __tablename__ = "roles"
     __table_args__ = (
-        PrimaryKeyConstraint('id', name='roles_pkey'),
-        UniqueConstraint('uuid', name='roles_uuid_key')
+        PrimaryKeyConstraint("id", name="roles_pkey"),
+        UniqueConstraint("uuid", name="roles_uuid_key"),
     )
 
-    id = Column(Integer, Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1))
+    id = Column(
+        Integer,
+        Identity(
+            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
+        ),
+    )
     uuid = Column(UUID)
     account_id = Column(Integer)
     role_name = Column(String(100))
@@ -191,17 +236,22 @@ class Roles(Base):
     created_at = Column(DateTime(True))
     updated_at = Column(DateTime(True))
 
-    permission = relationship('Permissions', secondary='roles_permissions_link', back_populates='role')
-    users = relationship('Users', back_populates='user_role')
+    permission = relationship(
+        "Permissions", secondary="roles_permissions_link", back_populates="role"
+    )
+    users = relationship("Users", back_populates="user_role")
 
 
 class Settings(Base):
-    __tablename__ = 'settings'
-    __table_args__ = (
-        PrimaryKeyConstraint('id', name='settings_pkey'),
-    )
+    __tablename__ = "settings"
+    __table_args__ = (PrimaryKeyConstraint("id", name="settings_pkey"),)
 
-    id = Column(Integer, Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1))
+    id = Column(
+        Integer,
+        Identity(
+            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
+        ),
+    )
     account_id = Column(Integer)
     entity = Column(String(64))
     value = Column(String(64))
@@ -211,13 +261,18 @@ class Settings(Base):
 
 
 class TasksLog(Base):
-    __tablename__ = 'tasks_log'
+    __tablename__ = "tasks_log"
     __table_args__ = (
-        PrimaryKeyConstraint('id', name='task_duration_pkey'),
-        UniqueConstraint('uuid', name='task_duration_uuid_key')
+        PrimaryKeyConstraint("id", name="task_duration_pkey"),
+        UniqueConstraint("uuid", name="task_duration_uuid_key"),
     )
 
-    id = Column(Integer, Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1))
+    id = Column(
+        Integer,
+        Identity(
+            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
+        ),
+    )
     uuid = Column(UUID)
     created_at = Column(DateTime(True))
     start_at = Column(DateTime(True))
@@ -232,35 +287,46 @@ class TasksLog(Base):
 
 
 t_ideas_files_link = Table(
-    'ideas_files_link', metadata,
-    Column('idea_id', Integer, nullable=False),
-    Column('file_id', Integer, nullable=False),
-    ForeignKeyConstraint(['file_id'], ['files.id'], name='ideas_files_link_fk_1'),
-    ForeignKeyConstraint(['idea_id'], ['ideas.id'], name='ideas_files_link_fk'),
-    PrimaryKeyConstraint('idea_id', 'file_id', name='ideas_files_link_pkey')
+    "ideas_files_link",
+    metadata,
+    Column("idea_id", Integer, nullable=False),
+    Column("file_id", Integer, nullable=False),
+    ForeignKeyConstraint(["file_id"], ["files.id"], name="ideas_files_link_fk_1"),
+    ForeignKeyConstraint(["idea_id"], ["ideas.id"], name="ideas_files_link_fk"),
+    PrimaryKeyConstraint("idea_id", "file_id", name="ideas_files_link_pkey"),
 )
 
 
 t_roles_permissions_link = Table(
-    'roles_permissions_link', metadata,
-    Column('role_id', Integer, nullable=False),
-    Column('permission_id', Integer, nullable=False),
-    ForeignKeyConstraint(['permission_id'], ['permissions.id'], name='roles_permissions_link_fk_1'),
-    ForeignKeyConstraint(['role_id'], ['roles.id'], name='roles_permissions_link_fk'),
-    PrimaryKeyConstraint('role_id', 'permission_id', name='roles_permissions_link_pkey')
+    "roles_permissions_link",
+    metadata,
+    Column("role_id", Integer, nullable=False),
+    Column("permission_id", Integer, nullable=False),
+    ForeignKeyConstraint(
+        ["permission_id"], ["permissions.id"], name="roles_permissions_link_fk_1"
+    ),
+    ForeignKeyConstraint(["role_id"], ["roles.id"], name="roles_permissions_link_fk"),
+    PrimaryKeyConstraint(
+        "role_id", "permission_id", name="roles_permissions_link_pkey"
+    ),
 )
 
 
 class Users(Base):
-    __tablename__ = 'users'
+    __tablename__ = "users"
     __table_args__ = (
-        ForeignKeyConstraint(['user_role_id'], ['roles.id'], name='role_FK'),
-        PrimaryKeyConstraint('id', name='users_pkey'),
-        UniqueConstraint('email', name='users_email_key'),
-        UniqueConstraint('phone', name='users_phone_key')
+        ForeignKeyConstraint(["user_role_id"], ["roles.id"], name="role_FK"),
+        PrimaryKeyConstraint("id", name="users_pkey"),
+        UniqueConstraint("email", name="users_email_key"),
+        UniqueConstraint("phone", name="users_phone_key"),
     )
 
-    id = Column(Integer, Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1))
+    id = Column(
+        Integer,
+        Identity(
+            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
+        ),
+    )
     password = Column(String(256), nullable=False)
     is_active = Column(Boolean, nullable=False)
     tz = Column(String(64), nullable=False)
@@ -282,20 +348,29 @@ class Users(Base):
     created_at = Column(DateTime(True))
     updated_at = Column(DateTime(True))
 
-    user_role = relationship('Roles', back_populates='users')
-    tasks = relationship('Tasks', foreign_keys='[Tasks.assignee_id]', back_populates='assignee')
-    tasks_ = relationship('Tasks', foreign_keys='[Tasks.author_id]', back_populates='author')
+    user_role = relationship("Roles", back_populates="users")
+    tasks = relationship(
+        "Tasks", foreign_keys="[Tasks.assignee_id]", back_populates="assignee"
+    )
+    tasks_ = relationship(
+        "Tasks", foreign_keys="[Tasks.author_id]", back_populates="author"
+    )
 
 
 class Tasks(Base):
-    __tablename__ = 'tasks'
+    __tablename__ = "tasks"
     __table_args__ = (
-        ForeignKeyConstraint(['assignee_id'], ['users.id'], name='tasks_assignee_fk'),
-        ForeignKeyConstraint(['author_id'], ['users.id'], name='tasks_fk'),
-        PrimaryKeyConstraint('id', name='tasks_pkey')
+        ForeignKeyConstraint(["assignee_id"], ["users.id"], name="tasks_assignee_fk"),
+        ForeignKeyConstraint(["author_id"], ["users.id"], name="tasks_fk"),
+        PrimaryKeyConstraint("id", name="tasks_pkey"),
     )
 
-    id = Column(Integer, Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1))
+    id = Column(
+        Integer,
+        Identity(
+            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
+        ),
+    )
     uuid = Column(UUID)
     account_id = Column(Integer)
     author_id = Column(Integer)
@@ -319,38 +394,45 @@ class Tasks(Base):
     started_at = Column(Time(True))
     status = Column(String(32))
 
-    comment = relationship('Comments', secondary='task_comments_link', back_populates='task')
-    event = relationship('Events', secondary='task_events_link', back_populates='task')
-    file = relationship('Files', secondary='task_files_link', back_populates='task')
-    assignee = relationship('Users', foreign_keys=[assignee_id], back_populates='tasks')
-    author = relationship('Users', foreign_keys=[author_id], back_populates='tasks_')
+    comment = relationship(
+        "Comments", secondary="task_comments_link", back_populates="task"
+    )
+    event = relationship("Events", secondary="task_events_link", back_populates="task")
+    file = relationship("Files", secondary="task_files_link", back_populates="task")
+    assignee = relationship("Users", foreign_keys=[assignee_id], back_populates="tasks")
+    author = relationship("Users", foreign_keys=[author_id], back_populates="tasks_")
 
 
 t_task_comments_link = Table(
-    'task_comments_link', metadata,
-    Column('task_id', Integer, nullable=False),
-    Column('comment_id', Integer, nullable=False),
-    ForeignKeyConstraint(['comment_id'], ['comments.id'], name='task_comments_link_fk_1'),
-    ForeignKeyConstraint(['task_id'], ['tasks.id'], name='task_comments_link_fk'),
-    PrimaryKeyConstraint('task_id', 'comment_id', name='task_comments_link_pkey')
+    "task_comments_link",
+    metadata,
+    Column("task_id", Integer, nullable=False),
+    Column("comment_id", Integer, nullable=False),
+    ForeignKeyConstraint(
+        ["comment_id"], ["comments.id"], name="task_comments_link_fk_1"
+    ),
+    ForeignKeyConstraint(["task_id"], ["tasks.id"], name="task_comments_link_fk"),
+    PrimaryKeyConstraint("task_id", "comment_id", name="task_comments_link_pkey"),
 )
 
 
 t_task_events_link = Table(
-    'task_events_link', metadata,
-    Column('task_id', Integer, nullable=False),
-    Column('event_id', Integer, nullable=False),
-    ForeignKeyConstraint(['event_id'], ['events.id'], name='task_events_link_fk_1'),
-    ForeignKeyConstraint(['task_id'], ['tasks.id'], name='task_events_link_fk'),
-    PrimaryKeyConstraint('task_id', 'event_id', name='task_events_link_pkey')
+    "task_events_link",
+    metadata,
+    Column("task_id", Integer, nullable=False),
+    Column("event_id", Integer, nullable=False),
+    ForeignKeyConstraint(["event_id"], ["events.id"], name="task_events_link_fk_1"),
+    ForeignKeyConstraint(["task_id"], ["tasks.id"], name="task_events_link_fk"),
+    PrimaryKeyConstraint("task_id", "event_id", name="task_events_link_pkey"),
 )
 
 
 t_task_files_link = Table(
-    'task_files_link', metadata,
-    Column('task_id', Integer, nullable=False),
-    Column('file_id', Integer, nullable=False),
-    ForeignKeyConstraint(['file_id'], ['files.id'], name='task_files_link_fk_1'),
-    ForeignKeyConstraint(['task_id'], ['tasks.id'], name='task_files_link_fk'),
-    PrimaryKeyConstraint('task_id', 'file_id', name='task_files_link_pkey')
+    "task_files_link",
+    metadata,
+    Column("task_id", Integer, nullable=False),
+    Column("file_id", Integer, nullable=False),
+    ForeignKeyConstraint(["file_id"], ["files.id"], name="task_files_link_fk_1"),
+    ForeignKeyConstraint(["task_id"], ["tasks.id"], name="task_files_link_fk"),
+    PrimaryKeyConstraint("task_id", "file_id", name="task_files_link_pkey"),
 )

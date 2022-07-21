@@ -3,17 +3,20 @@ import secrets
 from datetime import datetime, timedelta
 from uuid import uuid4
 
-from app.models.shared_models import PublicCompany, PublicUser
-from app.schemas.requests import UserRegisterIn
-from app.schemas.schemas import PubliCompanyAdd
 from langcodes import standardize_tag
 from passlib.hash import argon2
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.models.shared_models import PublicCompany, PublicUser
+from app.schemas.requests import UserRegisterIn
+from app.schemas.schemas import PubliCompanyAdd
+
 
 def get_user_by_email(db: Session, email: str):
-    return db.execute(select(PublicUser.email).where(PublicUser.email == email)).scalar_one_or_none()
+    return db.execute(
+        select(PublicUser.email).where(PublicUser.email == email)
+    ).scalar_one_or_none()
 
 
 def get_user_by_service_token(db: Session, token: str):
@@ -26,11 +29,15 @@ def get_user_by_service_token(db: Session, token: str):
 
 
 def get_company_by_nip(db: Session, nip: str):
-    return db.execute(select(PublicCompany).where(PublicCompany.nip == nip)).scalar_one_or_none()
+    return db.execute(
+        select(PublicCompany).where(PublicCompany.nip == nip)
+    ).scalar_one_or_none()
 
 
 def generate_qr_id(db: Session, nip: str):
-    allowed_chars = "abcdefghijkmnopqrstuvwxyz23456789"  # ABCDEFGHJKLMNPRSTUVWXYZ23456789
+    allowed_chars = (
+        "abcdefghijkmnopqrstuvwxyz23456789"  # ABCDEFGHJKLMNPRSTUVWXYZ23456789
+    )
     company_ids = db.execute(select(PublicCompany.qr_id)).scalars().all()
     proposed_id = "".join(random.choice(allowed_chars) for x in range(3))
     while proposed_id in company_ids:

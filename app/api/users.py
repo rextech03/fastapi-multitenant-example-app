@@ -2,13 +2,6 @@ from datetime import datetime
 
 from app.db import get_db
 from app.models.models import User
-from app.schemas.schemas import (
-    BookBase,
-    StandardResponse,
-    UserBase,
-    UserLoginIn,
-    UserLoginOut,
-)
 from faker import Faker
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
@@ -19,10 +12,10 @@ user_router = APIRouter()
 
 @user_router.get("/")
 async def user_get_all(*, db: Session = Depends(get_db)):
-    DEFAULT_DATABASE_USER = db.execute(select(User)).scalars().all()
-    if DEFAULT_DATABASE_USER is None:
+    db_user = db.execute(select(User)).scalars().all()
+    if db_user is None:
         raise HTTPException(status_code=404, detail="Book not found")
-    return DEFAULT_DATABASE_USER
+    return db_user
 
 
 @user_router.post("/")  # , response_model=User

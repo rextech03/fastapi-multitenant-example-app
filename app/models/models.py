@@ -1,8 +1,7 @@
 import sqlalchemy as sa
+from sqlalchemy.orm import relationship
+
 from app.db import Base
-from sqlalchemy import Column, ForeignKey, Identity, Table
-from sqlalchemy.dialects.postgresql import BOOLEAN, INTEGER, TIMESTAMP, UUID, VARCHAR
-from sqlalchemy.orm import joinedload, relationship
 
 # role_permission_rel = Table(
 #     "roles_permissions_link",
@@ -71,21 +70,43 @@ class Book(Base):
 
 class Role(Base):
     __tablename__ = "roles"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    id = sa.Column(
+        sa.INTEGER(),
+        sa.Identity(),
+        primary_key=True,
+        autoincrement=True,
+        nullable=False,
+    )
     role_name = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
-    role_description = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
+    role_description = sa.Column(
+        sa.VARCHAR(length=100), autoincrement=False, nullable=True
+    )
     users_FK = relationship("User", back_populates="role_FK")
 
 
 class User(Base):
     __tablename__ = "users"
-    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    id = sa.Column(
+        sa.INTEGER(),
+        sa.Identity(),
+        primary_key=True,
+        autoincrement=True,
+        nullable=False,
+    )
     # uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
-    email = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True, unique=True)
+    email = sa.Column(
+        sa.VARCHAR(length=256), autoincrement=False, nullable=True, unique=True
+    )
     first_name = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
     last_name = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
-    user_role_id = sa.Column(sa.INTEGER(), sa.ForeignKey("roles.id"), autoincrement=False, nullable=True)
-    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
-    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    user_role_id = sa.Column(
+        sa.INTEGER(), sa.ForeignKey("roles.id"), autoincrement=False, nullable=True
+    )
+    created_at = sa.Column(
+        sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True
+    )
+    updated_at = sa.Column(
+        sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True
+    )
 
     role_FK = relationship("Role", back_populates="users_FK")

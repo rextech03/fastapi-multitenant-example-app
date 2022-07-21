@@ -1,6 +1,4 @@
-import uuid
-
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 
 class BaseResponse(BaseModel):

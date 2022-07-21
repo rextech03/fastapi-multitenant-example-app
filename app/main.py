@@ -1,29 +1,26 @@
-import argparse
-import os
-import traceback
 from pathlib import Path
-from typing import List
-from uuid import uuid4
 
-import sqlalchemy as sa
-from alembic import command
-from alembic.config import Config
 from faker import Faker
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 from sqlalchemy import select
-from sqlalchemy.orm import Session, joinedload, relationship, sessionmaker
+from sqlalchemy.orm import Session
 
 from app.api.auth import auth_router
 from app.api.users import user_router
-from app.db import SQLALCHEMY_DATABASE_URL, get_db, with_db
+from app.db import get_db
 from app.models.models import Book
-from app.models.shared_models import Tenant
 from app.schemas.schemas import BookBase, StandardResponse
 from app.service.tenants import alembic_upgrade_head, tenant_create
 
-logger.add("logs.log", format="{time} - {level} - {message}", level="DEBUG", backtrace=False, diagnose=True)
+logger.add(
+    "logs.log",
+    format="{time} - {level} - {message}",
+    level="DEBUG",
+    backtrace=False,
+    diagnose=True,
+)
 
 
 # -------------------------------------------------------
@@ -106,7 +103,9 @@ def read_user(*, session: Session = Depends(get_db)):
 
 @app.get("/books/{book_id}", response_model=BookBase)  #
 def read_user(*, session: Session = Depends(get_db), book_id: int):
-    db_book = session.execute(select(Book).where(Book.id == book_id)).scalar_one_or_none()
+    db_book = session.execute(
+        select(Book).where(Book.id == book_id)
+    ).scalar_one_or_none()
     if db_book is None:
         raise HTTPException(status_code=404, detail="Book not found")
     return db_book

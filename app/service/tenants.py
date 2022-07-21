@@ -6,18 +6,20 @@ from uuid import uuid4
 import sqlalchemy as sa
 from alembic import command
 from alembic.config import Config
-from app.db import SQLALCHEMY_DATABASE_URL, get_db, with_db
-from app.models.shared_models import Tenant
 from fastapi import HTTPException
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+
+from app.db import SQLALCHEMY_DATABASE_URL, with_db
+from app.models.shared_models import Tenant
 
 
 def alembic_upgrade_head(tenant_name, revision="head"):
     # set the paths values
     try:
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        package_dir = os.path.normpath(os.path.join(current_dir, "..", ".."))  # TODO find better way: str(Path.cwd())
+        package_dir = os.path.normpath(
+            os.path.join(current_dir, "..", "..")
+        )  # TODO find better way: str(Path.cwd())
         directory = os.path.join(package_dir, "migrations")
 
         print("D:", current_dir)
@@ -63,7 +65,9 @@ def tenant_create(name: str, schema: str, host: str) -> None:
         # print("#####", context.get_current_revision(), script.get_current_head())
         # if context.get_current_revision() != script.get_current_head():
         # raise RuntimeError("Database is not up-to-date. Execute migrations before adding new tenants.")
-        db_tenant = db.execute(select(Tenant).where(Tenant.schema == schema)).scalar_one_or_none()
+        db_tenant = db.execute(
+            select(Tenant).where(Tenant.schema == schema)
+        ).scalar_one_or_none()
         if db_tenant is not None:
             raise HTTPException(status_code=404, detail="Tenant already exists!")
 
