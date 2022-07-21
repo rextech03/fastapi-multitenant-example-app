@@ -80,6 +80,18 @@ class UserBase(BaseModel):
         orm_mode = True
 
 
+class UserRegisterIn(BaseModel):  # OK
+    email: EmailStr
+    password: str
+    password_confirmation: str
+    tos: bool
+    tz: str | None = "Europe/Warsaw"
+    lang: str | None = "pl"
+
+    class Config:
+        orm_mode = True
+
+
 class UserLoginIn(BaseModel):  # OK
     email: EmailStr
     password: str | None

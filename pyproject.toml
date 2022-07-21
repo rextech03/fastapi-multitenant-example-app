@@ -19,6 +19,11 @@ Faker = "^13.15.0"
 email-validator = "^1.2.1"
 requests = "^2.28.1"
 typer = "^0.6.1"
+disposable-email-domains = "^0.0.79"
+passlib = {extras = ["argon2"], version = "^1.7.4"}
+pytz = "^2022.1"
+langcodes = "^3.3.0"
+python-stdnum = "^1.17"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"

@@ -1,37 +1,22 @@
 import argparse
 import os
 import traceback
-from contextlib import contextmanager
 from typing import List
 from uuid import uuid4
 
-import alembic  # pylint: disable=E0401
-import alembic.config  # pylint: disable=E0401
-import alembic.migration  # pylint: disable=E0401
-import alembic.runtime.environment  # pylint: disable=E0401
-import alembic.script  # pylint: disable=E0401
-import alembic.util  # pylint: disable=E0401
 import sqlalchemy as sa
 from alembic import command
 from alembic.config import Config
-from alembic.runtime.migration import MigrationContext
-from dotenv import find_dotenv, load_dotenv
 from faker import Faker
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 from sqlalchemy import select
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session, joinedload, relationship, sessionmaker
 
 from app.api.auth import auth_router
 from app.api.users import user_router
-from app.db import (
-    SQLALCHEMY_DATABASE_URL,
-    get_db,
-    get_tenant_specific_metadata,
-    with_db,
-)
+from app.db import SQLALCHEMY_DATABASE_URL, get_db, with_db
 from app.models.models import Book
 from app.models.shared_models import Tenant
 from app.schemas.schemas import BookBase, StandardResponse
@@ -78,21 +63,6 @@ def alembic_upgrade_head(tenant_name, revision="head"):
     except Exception as e:
         print(e)
         print(traceback.format_exc())
-
-
-# def _get_alembic_config():
-#     from alembic.config import Config
-
-#     current_dir = os.path.dirname(os.path.abspath(__file__))
-#     package_dir = os.path.normpath(os.path.join(current_dir, ".."))
-#     directory = os.path.join(package_dir, "migrations")
-#     config = Config(os.path.join(package_dir, "alembic.ini"))
-#     config.set_main_option("script_location", directory.replace("%", "%%"))  # directory.replace('%', '%%')
-#     config.set_main_option("sqlalchemy.url", SQLALCHEMY_DATABASE_URL)
-#     return config
-
-
-# alembic_config = _get_alembic_config()
 
 
 def tenant_create(name: str, schema: str, host: str) -> None:
@@ -171,18 +141,10 @@ def read_root():
     return {"Hello": "World"}
 
 
-from alembic import op
-from sqlalchemy import engine_from_config
-from sqlalchemy.engine import reflection
-
-
 @app.get("/create")
 def read_item(name: str, schema: str, host: str):
-    print("OK")
     tenant_create(name, schema, host)
-    print("OK1")
     # alembic_upgrade_head(schema)
-    # print("OK2")
     return {"name": name, "schema": schema, "host": host}
 
 

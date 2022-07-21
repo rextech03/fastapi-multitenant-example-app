@@ -22,7 +22,7 @@ db_database = settings.db_name
 SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://{db_user}:{db_password}@{db_host}:5438/{db_database}"
 engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True, pool_pre_ping=True, pool_recycle=280)
 
-print(SQLALCHEMY_DATABASE_URL)
+# print(SQLALCHEMY_DATABASE_URL)
 
 metadata = sa.MetaData(schema="tenant")
 Base = declarative_base(metadata=metadata)
@@ -67,13 +67,13 @@ def get_tenant(req: Request) -> Tenant:
 
 
 def get_db(tenant: Tenant = Depends(get_tenant)):
-    print("tenant.schema", tenant.schema)
+    # print("tenant.schema", tenant.schema)
     with with_db(tenant.schema) as db:
         yield db
 
 
 def get_public_db():
-    with with_db("shared") as db:
+    with with_db("public") as db:
         yield db
     # --------------------
 

@@ -2,6 +2,7 @@
  - ręczne utworzenie migracji
  - uruchomienie pierwszej migracji: `alembic -x tenant=public upgrade d6ba8c13303e`
  - utworzenie pierwszego użytkownika ``GET /create?name=a&schema=a&host=a`
+ - test migracji `alembic -x dry_run=True -x tenant=a upgrade head`
  - zastosowanie migracji `alembic -x tenant=a upgrade head`
 
 ### Alembic

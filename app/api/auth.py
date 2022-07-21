@@ -1,13 +1,44 @@
+from app.crud import crud_auth
 from app.db import engine, get_public_db
 from app.models.models import User
-from app.models.shared_models import SharedUser, Tenant
-from app.schemas.schemas import StandardResponse, UserLoginIn, UserLoginOut
+from app.models.shared_models import PublicUser, Tenant
+from app.schemas.schemas import (
+    StandardResponse,
+    UserLoginIn,
+    UserLoginOut,
+    UserRegisterIn,
+)
+from app.service import auth
+from app.service.password import Password
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
 
 auth_router = APIRouter()
+
+
+@auth_router.post("/register", response_model=StandardResponse)
+async def auth_register(*, shared_db: Session = Depends(get_public_db), user: UserRegisterIn):
+
+    if auth.is_email_temporary(user.email):
+        raise HTTPException(status_code=400, detail="Temporary email not allowed")
+
+    db_user = crud_auth.get_user_by_email(shared_db, user.email)
+    if db_user:
+        raise HTTPException(status_code=400, detail="User already exists")
+
+    is_password_ok = Password(user.password).compare(user.password_confirmation)
+
+    if is_password_ok is False:
+        raise HTTPException(status_code=400, detail=is_password_ok)
+
+    if auth.is_timezone_correct is False:
+        raise HTTPException(status_code=400, detail="Invalid timezone")
+
+    crud_auth.create_public_user(shared_db, user)
+
+    return {"ok": True}
 
 
 @auth_router.post("/login")  # , response_model=UserLoginOut
@@ -19,7 +50,7 @@ async def auth_login(*, shared_db: Session = Depends(get_public_db), users: User
         res = UserLoginIn.from_orm(users)
 
         db_shared_user = shared_db.execute(
-            select(SharedUser).where(SharedUser.email == res.email).where(SharedUser.is_active == True)
+            select(PublicUser).where(PublicUser.email == res.email).where(PublicUser.is_active == True)
         ).scalar_one_or_none()
 
         db_shared_tenant = shared_db.execute(
