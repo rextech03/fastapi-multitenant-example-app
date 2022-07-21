@@ -1,12 +1,13 @@
-# fastapi_docker/app/config.py
-
-import logging
 import os
 from functools import lru_cache
+from pathlib import Path
+from typing import Literal
 
 from pydantic import BaseSettings
 
-log = logging.getLogger("uvicorn")
+# PROJECT_DIR = Path(__file__).parent.parent
+
+# print(PROJECT_DIR)
 
 
 class Settings(BaseSettings):
@@ -18,6 +19,8 @@ class Settings(BaseSettings):
     db_user: str = os.getenv("DB_USERNAME")
     db_password: str = os.getenv("DB_PASSWORD")
 
+    DEFAULT_SQLALCHEMY_DATABASE_URI: str = ""
+
     db_testing: str = os.getenv("DATABASE_TEST_URL")
 
     class Config:
@@ -28,5 +31,4 @@ class Settings(BaseSettings):
 
 @lru_cache()
 def get_settings() -> BaseSettings:
-    log.info("Loading config settings from the environment...")
     return Settings()

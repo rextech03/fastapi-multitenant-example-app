@@ -2,12 +2,9 @@ from app.crud import crud_auth
 from app.db import engine, get_public_db
 from app.models.models import User
 from app.models.shared_models import PublicUser, Tenant
-from app.schemas.schemas import (
-    StandardResponse,
-    UserLoginIn,
-    UserLoginOut,
-    UserRegisterIn,
-)
+from app.schemas.requests import UserRegisterIn
+from app.schemas.responses import StandardResponse
+from app.schemas.schemas import UserLoginIn, UserLoginOut
 from app.service import auth
 from app.service.password import Password
 from fastapi import APIRouter, Depends, HTTPException, Request
