@@ -35,34 +35,18 @@ class PublicUser(Base):
         nullable=False,
     )
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
-    email = sa.Column(
-        sa.VARCHAR(length=256), autoincrement=False, nullable=True, unique=True
-    )
-    password = sa.Column(
-        sa.VARCHAR(length=256), autoincrement=False, nullable=True, unique=True
-    )
-    service_token = sa.Column(
-        sa.VARCHAR(length=100), autoincrement=False, nullable=True, unique=True
-    )
-    service_token_valid_to = sa.Column(
-        sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True
-    )
+    email = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True, unique=True)
+    password = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True, unique=True)
+    service_token = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True, unique=True)
+    service_token_valid_to = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     is_active = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     is_verified = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     tos = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     tenant_id = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True)
-    tz = sa.Column(
-        sa.VARCHAR(length=64), autoincrement=False, nullable=True, unique=True
-    )
-    lang = sa.Column(
-        sa.VARCHAR(length=8), autoincrement=False, nullable=True, unique=True
-    )
-    created_at = sa.Column(
-        sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True
-    )
-    updated_at = sa.Column(
-        sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True
-    )
+    tz = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True, unique=True)
+    lang = sa.Column(sa.VARCHAR(length=8), autoincrement=False, nullable=True, unique=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     __table_args__ = {"schema": "public"}
 
 
@@ -76,28 +60,13 @@ class PublicCompany(Base):
         nullable=False,
     )
     uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
-    name = sa.Column(
-        sa.VARCHAR(length=256), autoincrement=False, nullable=True, unique=True
-    )
-    short_name = sa.Column(
-        sa.VARCHAR(length=256), autoincrement=False, nullable=True, unique=True
-    )
-    nip = sa.Column(
-        sa.VARCHAR(length=16), autoincrement=False, nullable=True, unique=True
-    )
-    country = sa.Column(
-        sa.VARCHAR(length=128), autoincrement=False, nullable=True, unique=True
-    )
-    city = sa.Column(
-        sa.VARCHAR(length=128), autoincrement=False, nullable=True, unique=True
-    )
-    qr_id = sa.Column(
-        sa.VARCHAR(length=32), autoincrement=False, nullable=True, unique=True
-    )
-    created_at = sa.Column(
-        sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True
-    )
-    updated_at = sa.Column(
-        sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True
-    )
+    name = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True, unique=True)
+    short_name = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True, unique=True)
+    nip = sa.Column(sa.VARCHAR(length=16), autoincrement=False, nullable=True, unique=True)
+    country = sa.Column(sa.VARCHAR(length=128), autoincrement=False, nullable=True, unique=True)
+    city = sa.Column(sa.VARCHAR(length=128), autoincrement=False, nullable=True, unique=True)
+    tenant_id = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True)
+    qr_id = sa.Column(sa.VARCHAR(length=32), autoincrement=False, nullable=True, unique=True)
+    created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
+    updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     __table_args__ = {"schema": "public"}

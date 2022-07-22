@@ -8,9 +8,9 @@ autoflake --recursive --in-place  \
         --ignore-init-module-imports \
         app
 echo "black"
-black app
+black --line-length 120 app
 echo "isort"
 isort app
 echo "flake8"
-flake8 app --count --statistics
+flake8 app --count --statistics --max-line-length 120
 echo "OK"

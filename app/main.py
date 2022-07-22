@@ -76,10 +76,12 @@ def read_root():
 
 
 @app.get("/create")
-def read_item(name: str, schema: str, host: str):
-    tenant_create(name, schema, host)
+def read_item(schema: str):
+    tenant_create(schema)
     # alembic_upgrade_head(schema)
-    return {"name": name, "schema": schema, "host": host}
+    return {
+        "schema": schema,
+    }
 
 
 @app.get("/upgrade")
@@ -103,9 +105,7 @@ def read_user(*, session: Session = Depends(get_db)):
 
 @app.get("/books/{book_id}", response_model=BookBase)  #
 def read_user(*, session: Session = Depends(get_db), book_id: int):
-    db_book = session.execute(
-        select(Book).where(Book.id == book_id)
-    ).scalar_one_or_none()
+    db_book = session.execute(select(Book).where(Book.id == book_id)).scalar_one_or_none()
     if db_book is None:
         raise HTTPException(status_code=404, detail="Book not found")
     return db_book
