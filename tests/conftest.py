@@ -46,7 +46,7 @@ def apply_migrations():
     os.environ["TESTING"] = "1"
 
     first_migration()
-    # tenant_create("a", "a", "a")
+    # tenant_create("a")
     # alembic_upgrade_head("a")
     yield
     # alembic.command.downgrade(config, "base")
