@@ -1,5 +1,8 @@
 from datetime import datetime
 
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
 from app.crud import crud_auth
 from app.db import engine, get_public_db
 from app.schemas.requests import UserFirstRunIn, UserRegisterIn
@@ -8,8 +11,6 @@ from app.service import auth
 from app.service.api_rejestr_io import get_company_details
 from app.service.password import Password
 from app.service.tenants import alembic_upgrade_head, tenant_create
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
 
 auth_router = APIRouter()
 
@@ -50,7 +51,6 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
 
     db_company = crud_auth.get_public_company_by_nip(shared_db, user.nip)
     user_role_id = 2  # SUPER_ADMIN[1] / USER[2] / VIEWER[3]
-    is_verified = False
 
     if not db_company:
         company_data = get_company_details(user.nip)
@@ -60,7 +60,6 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
         tenant_create(db_company.tenant_id)
         alembic_upgrade_head(db_company.tenant_id)
         user_role_id = 1  # SUPER_ADMIN[1] / USER[2] / VIEWER[3]
-        is_verified = True
 
     update_db_user = {
         "tenant_id": db_company.tenant_id,
@@ -77,7 +76,7 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
     # schema_translate_map = dict(tenant="v2_92216c51ccbe43e88f91d90144d512a6")
     connectable = engine.execution_options(schema_translate_map={"tenant": db_company.tenant_id})
     with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
-        db_tenant_user = crud_auth.create_tenant_user(db)
+        crud_auth.create_tenant_user(db)
 
     return {
         "ok": True,

@@ -96,7 +96,7 @@ def upgrade_head(schema: str):
 
 @app.get("/books")  # , response_model=List[BookBase]
 # @logger.catch()
-def read_user(*, session: Session = Depends(get_db)):
+def index_books(*, session: Session = Depends(get_db)):
     db_book = session.execute(select(Book)).scalars().all()
     # if db_book is None:
     #     raise HTTPException(status_code=403, detail="Book not found")
@@ -104,7 +104,7 @@ def read_user(*, session: Session = Depends(get_db)):
 
 
 @app.get("/books/{book_id}", response_model=BookBase)  #
-def read_user(*, session: Session = Depends(get_db), book_id: int):
+def show_book(*, session: Session = Depends(get_db), book_id: int):
     db_book = session.execute(select(Book).where(Book.id == book_id)).scalar_one_or_none()
     if db_book is None:
         raise HTTPException(status_code=404, detail="Book not found")
@@ -112,7 +112,7 @@ def read_user(*, session: Session = Depends(get_db), book_id: int):
 
 
 @app.post("/books", response_model=BookBase)  #
-def read_user(*, db: Session = Depends(get_db)):
+def add_book(*, db: Session = Depends(get_db)):
 
     faker = Faker()
 
@@ -128,7 +128,7 @@ def read_user(*, db: Session = Depends(get_db)):
 
 
 @app.delete("/books/{book_id}", response_model=StandardResponse)  #
-def read_user(*, db: Session = Depends(get_db), book_id: int):
+def delete_book(*, db: Session = Depends(get_db), book_id: int):
 
     db_book = db.execute(select(Book).where(Book.id == book_id)).scalar_one_or_none()
     db.delete(db_book)

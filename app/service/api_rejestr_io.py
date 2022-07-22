@@ -12,9 +12,7 @@ def get_company_details(nip):
     url = "https://rejestr.io/api/v2/org?nip=" + nip
     headers = {"Authorization": settings.REJESTR_IO_KEY}
 
-    path = Path(__file__).parent.parent.parent.joinpath(
-        "tests", "api_responses", "rejestr_io_get_by_nip.json"
-    )
+    path = Path(__file__).parent.parent.parent.joinpath("tests", "api_responses", "rejestr_io_get_by_nip.json")
 
     with path.open(encoding="UTF-8") as file:
         request_json = json.load(file)

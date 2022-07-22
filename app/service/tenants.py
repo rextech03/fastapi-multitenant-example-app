@@ -1,15 +1,12 @@
 import argparse
 import os
 import traceback
-from uuid import uuid4
 
 import sqlalchemy as sa
 from alembic import command
 from alembic.config import Config
+
 from app.db import SQLALCHEMY_DATABASE_URL, with_db
-from app.models.shared_models import Tenant
-from fastapi import HTTPException
-from sqlalchemy import select
 
 
 def alembic_upgrade_head(tenant_name, revision="head"):

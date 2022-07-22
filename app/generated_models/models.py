@@ -17,9 +17,7 @@ class Accounts(Base):
 
     id = Column(
         Integer,
-        Identity(
-            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
-        ),
+        Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1),
     )
     uuid = Column(UUID)
     company = Column(String(256))
@@ -43,17 +41,13 @@ class Comments(Base):
 
     id = Column(
         Integer,
-        Identity(
-            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
-        ),
+        Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1),
     )
     uuid = Column(UUID)
     message = Column(String(1024))
     user_id = Column(Integer)
 
-    task = relationship(
-        "Tasks", secondary="task_comments_link", back_populates="comment"
-    )
+    task = relationship("Tasks", secondary="task_comments_link", back_populates="comment")
 
 
 class Events(Base):
@@ -65,9 +59,7 @@ class Events(Base):
 
     id = Column(
         Integer,
-        Identity(
-            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
-        ),
+        Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1),
     )
     uuid = Column(UUID)
     account_id = Column(Integer)
@@ -98,9 +90,7 @@ class Files(Base):
 
     id = Column(
         Integer,
-        Identity(
-            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
-        ),
+        Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1),
     )
     uuid = Column(UUID)
     account_id = Column(Integer)
@@ -126,9 +116,7 @@ class Ideas(Base):
 
     id = Column(
         Integer,
-        Identity(
-            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
-        ),
+        Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1),
     )
     uuid = Column(UUID)
     account_id = Column(Integer)
@@ -152,9 +140,7 @@ class IdeasVotes(Base):
 
     id = Column(
         Integer,
-        Identity(
-            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
-        ),
+        Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1),
     )
     uuid = Column(UUID)
     account_id = Column(Integer)
@@ -170,9 +156,7 @@ class LoginHistory(Base):
 
     id = Column(
         Integer,
-        Identity(
-            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
-        ),
+        Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1),
     )
     login_date = Column(DateTime(True), nullable=False)
     failed = Column(Boolean, nullable=False)
@@ -196,9 +180,7 @@ class Permissions(Base):
 
     id = Column(
         Integer,
-        Identity(
-            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
-        ),
+        Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1),
     )
     uuid = Column(UUID)
     account_id = Column(Integer)
@@ -209,9 +191,7 @@ class Permissions(Base):
     created_at = Column(DateTime(True))
     updated_at = Column(DateTime(True))
 
-    role = relationship(
-        "Roles", secondary="roles_permissions_link", back_populates="permission"
-    )
+    role = relationship("Roles", secondary="roles_permissions_link", back_populates="permission")
 
 
 class Roles(Base):
@@ -223,9 +203,7 @@ class Roles(Base):
 
     id = Column(
         Integer,
-        Identity(
-            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
-        ),
+        Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1),
     )
     uuid = Column(UUID)
     account_id = Column(Integer)
@@ -236,9 +214,7 @@ class Roles(Base):
     created_at = Column(DateTime(True))
     updated_at = Column(DateTime(True))
 
-    permission = relationship(
-        "Permissions", secondary="roles_permissions_link", back_populates="role"
-    )
+    permission = relationship("Permissions", secondary="roles_permissions_link", back_populates="role")
     users = relationship("Users", back_populates="user_role")
 
 
@@ -248,9 +224,7 @@ class Settings(Base):
 
     id = Column(
         Integer,
-        Identity(
-            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
-        ),
+        Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1),
     )
     account_id = Column(Integer)
     entity = Column(String(64))
@@ -269,9 +243,7 @@ class TasksLog(Base):
 
     id = Column(
         Integer,
-        Identity(
-            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
-        ),
+        Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1),
     )
     uuid = Column(UUID)
     created_at = Column(DateTime(True))
@@ -302,13 +274,9 @@ t_roles_permissions_link = Table(
     metadata,
     Column("role_id", Integer, nullable=False),
     Column("permission_id", Integer, nullable=False),
-    ForeignKeyConstraint(
-        ["permission_id"], ["permissions.id"], name="roles_permissions_link_fk_1"
-    ),
+    ForeignKeyConstraint(["permission_id"], ["permissions.id"], name="roles_permissions_link_fk_1"),
     ForeignKeyConstraint(["role_id"], ["roles.id"], name="roles_permissions_link_fk"),
-    PrimaryKeyConstraint(
-        "role_id", "permission_id", name="roles_permissions_link_pkey"
-    ),
+    PrimaryKeyConstraint("role_id", "permission_id", name="roles_permissions_link_pkey"),
 )
 
 
@@ -323,9 +291,7 @@ class Users(Base):
 
     id = Column(
         Integer,
-        Identity(
-            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
-        ),
+        Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1),
     )
     password = Column(String(256), nullable=False)
     is_active = Column(Boolean, nullable=False)
@@ -349,12 +315,8 @@ class Users(Base):
     updated_at = Column(DateTime(True))
 
     user_role = relationship("Roles", back_populates="users")
-    tasks = relationship(
-        "Tasks", foreign_keys="[Tasks.assignee_id]", back_populates="assignee"
-    )
-    tasks_ = relationship(
-        "Tasks", foreign_keys="[Tasks.author_id]", back_populates="author"
-    )
+    tasks = relationship("Tasks", foreign_keys="[Tasks.assignee_id]", back_populates="assignee")
+    tasks_ = relationship("Tasks", foreign_keys="[Tasks.author_id]", back_populates="author")
 
 
 class Tasks(Base):
@@ -367,9 +329,7 @@ class Tasks(Base):
 
     id = Column(
         Integer,
-        Identity(
-            start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1
-        ),
+        Identity(start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1),
     )
     uuid = Column(UUID)
     account_id = Column(Integer)
@@ -394,9 +354,7 @@ class Tasks(Base):
     started_at = Column(Time(True))
     status = Column(String(32))
 
-    comment = relationship(
-        "Comments", secondary="task_comments_link", back_populates="task"
-    )
+    comment = relationship("Comments", secondary="task_comments_link", back_populates="task")
     event = relationship("Events", secondary="task_events_link", back_populates="task")
     file = relationship("Files", secondary="task_files_link", back_populates="task")
     assignee = relationship("Users", foreign_keys=[assignee_id], back_populates="tasks")
@@ -408,9 +366,7 @@ t_task_comments_link = Table(
     metadata,
     Column("task_id", Integer, nullable=False),
     Column("comment_id", Integer, nullable=False),
-    ForeignKeyConstraint(
-        ["comment_id"], ["comments.id"], name="task_comments_link_fk_1"
-    ),
+    ForeignKeyConstraint(["comment_id"], ["comments.id"], name="task_comments_link_fk_1"),
     ForeignKeyConstraint(["task_id"], ["tasks.id"], name="task_comments_link_fk"),
     PrimaryKeyConstraint("task_id", "comment_id", name="task_comments_link_pkey"),
 )

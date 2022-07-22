@@ -15,6 +15,4 @@ def generate_model(host, user, password, database, outfile=None):
 
 
 if __name__ == "__main__":
-    generate_model(
-        "database.example.org", "dbuser", "secretpassword", "mydatabase", "db.py"
-    )
+    generate_model("database.example.org", "dbuser", "secretpassword", "mydatabase", "db.py")

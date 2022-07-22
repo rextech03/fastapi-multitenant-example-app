@@ -20,9 +20,7 @@ db_database = settings.DEFAULT_DATABASE_DB
 
 # SQLALCHEMY_DATABASE_URL = settings.DEFAULT_SQLALCHEMY_DATABASE_URI
 SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://{DEFAULT_DATABASE_USER}:{DEFAULT_DATABASE_PASSWORD}@{DEFAULT_DATABASE_HOSTNAME}:5438/{db_database}"
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, echo=True, pool_pre_ping=True, pool_recycle=280
-)
+engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True, pool_pre_ping=True, pool_recycle=280)
 
 # print(SQLALCHEMY_DATABASE_URL)
 
@@ -57,9 +55,7 @@ def get_tenant(req: Request) -> Tenant:
         host_without_port = req.headers["host"].split(":", 1)[0]
 
         with with_db(None) as db:
-            tenant = db.execute(
-                select(Tenant).where(Tenant.schema_header_id == host_without_port)
-            ).scalar_one_or_none()
+            tenant = db.execute(select(Tenant).where(Tenant.schema_header_id == host_without_port)).scalar_one_or_none()
 
         if tenant is None:
             raise TenantNotFoundError(host_without_port)
