@@ -14,11 +14,11 @@ from sqlalchemy.orm import Session
 from unidecode import unidecode
 
 
-def get_public_user_by_email(db: Session, email: str):
+def get_public_user_by_email(db: Session, email: str) -> PublicUser | None:
     return db.execute(select(PublicUser.email).where(PublicUser.email == email)).scalar_one_or_none()
 
 
-def get_public_user_by_service_token(db: Session, token: str):
+def get_public_user_by_service_token(db: Session, token: str) -> PublicUser | None:
     return db.execute(
         select(PublicUser)
         .where(PublicUser.service_token == token)
@@ -27,7 +27,7 @@ def get_public_user_by_service_token(db: Session, token: str):
     ).scalar_one_or_none()
 
 
-def get_public_company_by_nip(db: Session, nip: str):
+def get_public_company_by_nip(db: Session, nip: str) -> PublicCompany | None:
     return db.execute(select(PublicCompany).where(PublicCompany.nip == nip)).scalar_one_or_none()
 
 
@@ -40,7 +40,7 @@ def generate_qr_id(db: Session, nip: str):
     return proposed_id
 
 
-def create_public_user(db: Session, user: UserRegisterIn):
+def create_public_user(db: Session, user: UserRegisterIn) -> PublicUser:
     new_user = PublicUser(
         uuid=str(uuid4()),
         email=user.email.strip(),
@@ -62,20 +62,22 @@ def create_public_user(db: Session, user: UserRegisterIn):
     return new_user
 
 
-def create_tenant_user(db: Session):
+def create_tenant_user(db: Session, tenant_data) -> User:
     try:
         new_user = User(
             uuid=str(uuid4()),
-            email="email",
-            password=argon2.hash("email"),
+            first_name=tenant_data["first_name"],
+            last_name=tenant_data["last_name"],
+            email=tenant_data["email"],
+            password=tenant_data["password"],
             # service_token=secrets.token_hex(32),
             # service_token_valid_to=datetime.utcnow() + timedelta(days=1),
             user_role_id=1,
             is_active=False,
             is_verified=False,
-            tos=True,
-            tz="Europe/Warsaw",
-            lang=standardize_tag("pl"),
+            tos=tenant_data["tos"],
+            tz=tenant_data["tz"],
+            lang=standardize_tag(tenant_data["lang"]),
             created_at=datetime.utcnow(),
         )
 

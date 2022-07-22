@@ -2,6 +2,7 @@ from datetime import datetime
 
 from app.crud import crud_auth
 from app.db import engine, get_public_db
+from app.models.shared_models import PublicUser
 from app.schemas.requests import UserFirstRunIn, UserRegisterIn
 from app.schemas.responses import StandardResponse
 from app.service import auth
@@ -44,7 +45,7 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
     if auth.is_nip_correct(user.nip):  # 123-456-32-18 - CompanyID number
         raise HTTPException(status_code=400, detail="Invalid NIP number")
 
-    db_user = crud_auth.get_public_user_by_service_token(shared_db, user.token)
+    db_user: PublicUser = crud_auth.get_public_user_by_service_token(shared_db, user.token)
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -75,7 +76,18 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
     # schema_translate_map = dict(tenant="v2_92216c51ccbe43e88f91d90144d512a6")
     connectable = engine.execution_options(schema_translate_map={"tenant": db_company.tenant_id})
     with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
-        crud_auth.create_tenant_user(db)
+
+        tenant_data = {
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": db_user.email,
+            "password": db_user.password,
+            "tos": db_user.tos,
+            "lang": db_user.lang,
+            "tz": db_user.tz,
+        }
+
+        crud_auth.create_tenant_user(db, tenant_data)
 
     return {
         "ok": True,
