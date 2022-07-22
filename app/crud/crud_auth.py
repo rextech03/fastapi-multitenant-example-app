@@ -3,16 +3,15 @@ import secrets
 from datetime import datetime, timedelta
 from uuid import uuid4
 
+from app.models.models import User
+from app.models.shared_models import PublicCompany, PublicUser
+from app.schemas.requests import UserRegisterIn
+from app.schemas.schemas import PubliCompanyAdd
 from langcodes import standardize_tag
 from passlib.hash import argon2
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from unidecode import unidecode
-
-from app.models.models import User
-from app.models.shared_models import PublicCompany, PublicUser
-from app.schemas.requests import UserRegisterIn
-from app.schemas.schemas import PubliCompanyAdd
 
 
 def get_public_user_by_email(db: Session, email: str):
@@ -64,25 +63,27 @@ def create_public_user(db: Session, user: UserRegisterIn):
 
 
 def create_tenant_user(db: Session):
-    new_user = User(
-        uuid=str(uuid4()),
-        email="email",
-        password=argon2.hash("email"),
-        # service_token=secrets.token_hex(32),
-        # service_token_valid_to=datetime.utcnow() + timedelta(days=1),
-        user_role_id=1,
-        is_active=False,
-        is_verified=False,
-        tos=True,
-        tz="Europe/Warsaw",
-        lang=standardize_tag("pl"),
-        created_at=datetime.utcnow(),
-    )
+    try:
+        new_user = User(
+            uuid=str(uuid4()),
+            email="email",
+            password=argon2.hash("email"),
+            # service_token=secrets.token_hex(32),
+            # service_token_valid_to=datetime.utcnow() + timedelta(days=1),
+            user_role_id=1,
+            is_active=False,
+            is_verified=False,
+            tos=True,
+            tz="Europe/Warsaw",
+            lang=standardize_tag("pl"),
+            created_at=datetime.utcnow(),
+        )
 
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+    except Exception as e:
+        print(e)
     return new_user
 
 

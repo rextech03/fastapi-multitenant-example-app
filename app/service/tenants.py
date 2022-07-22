@@ -5,7 +5,6 @@ import traceback
 import sqlalchemy as sa
 from alembic import command
 from alembic.config import Config
-
 from app.db import SQLALCHEMY_DATABASE_URL, with_db
 
 

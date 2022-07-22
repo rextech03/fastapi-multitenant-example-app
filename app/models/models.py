@@ -1,8 +1,7 @@
 import sqlalchemy as sa
+from app.db import Base
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-
-from app.db import Base
 
 # role_permission_rel = Table(
 #     "roles_permissions_link",
@@ -71,13 +70,7 @@ class Book(Base):
 
 class Role(Base):
     __tablename__ = "roles"
-    id = sa.Column(
-        sa.INTEGER(),
-        sa.Identity(),
-        primary_key=True,
-        autoincrement=True,
-        nullable=False,
-    )
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     role_name = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
     role_description = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
     users_FK = relationship("User", back_populates="role_FK")

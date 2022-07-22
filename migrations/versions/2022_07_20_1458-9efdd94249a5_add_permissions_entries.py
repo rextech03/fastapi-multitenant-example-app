@@ -56,6 +56,41 @@ def upgrade() -> None:
         ],
     )
 
+    roles = table(
+        "roles",
+        sa.Column("id", sa.INTEGER(), sa.Identity(), autoincrement=True, nullable=False),
+        sa.Column("uuid", postgresql.UUID(as_uuid=True), autoincrement=False, nullable=True),
+        sa.Column("is_custom", sa.BOOLEAN(), autoincrement=False, nullable=True),
+        sa.Column("is_visible", sa.BOOLEAN(), autoincrement=False, nullable=True),
+        sa.Column("role_name", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
+        sa.Column("role_title", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
+        sa.Column("role_description", sa.VARCHAR(length=100), autoincrement=False, nullable=True),
+    )
+
+    op.bulk_insert(
+        roles,
+        [
+            {
+                "uuid": uuid4(),
+                "name": "USER_ADD",
+                "is_custom": False,
+                "is_visible": True,
+                "role_name": "ADMIN_MASTER",
+                "role_title": "Main admin",
+                "role_description": "Main admin role",
+            },
+            {
+                "uuid": uuid4(),
+                "name": "USER_ADD",
+                "is_custom": False,
+                "is_visible": True,
+                "role_name": "ADMIN",
+                "role_title": "Admin",
+                "role_description": "Admin role",
+            },
+        ],
+    )
+
 
 def downgrade() -> None:
     op.execute("DELETE FROM permissions WHERE name IN ('USER_ADD', 'USER_DELETE')", execution_options=None)

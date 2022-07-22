@@ -1,8 +1,5 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-
 from app.crud import crud_auth
 from app.db import engine, get_public_db
 from app.schemas.requests import UserFirstRunIn, UserRegisterIn
@@ -11,6 +8,8 @@ from app.service import auth
 from app.service.api_rejestr_io import get_company_details
 from app.service.password import Password
 from app.service.tenants import alembic_upgrade_head, tenant_create
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
 auth_router = APIRouter()
 
@@ -72,7 +71,7 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
     }
 
     crud_auth.update_public_user(shared_db, db_user, update_db_user)
-
+    print("@@@@@@@@@@@@@", db_company.tenant_id)
     # schema_translate_map = dict(tenant="v2_92216c51ccbe43e88f91d90144d512a6")
     connectable = engine.execution_options(schema_translate_map={"tenant": db_company.tenant_id})
     with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
