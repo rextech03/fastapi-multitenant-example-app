@@ -1,9 +1,16 @@
+Based on [Multitenancy with FastAPI, SQLAlchemy and PostgreSQL](https://mergeboard.com/blog/6-multitenancy-fastapi-sqlalchemy-postgresql/)
+
+Main differences: Alembic behavior. All tables are created using migrations. Each tenant schema has his own `alembic_version` table with information about current migration revision.
+
 ### Workflow
- - ręczne utworzenie migracji
- - uruchomienie pierwszej migracji: `alembic -x tenant=public upgrade d6ba8c13303e`
- - utworzenie pierwszego użytkownika ``GET /create?name=a&schema=a&host=a`
- - test migracji `alembic -x dry_run=True -x tenant=a upgrade head`
- - zastosowanie migracji `alembic -x tenant=a upgrade head`
+ - FastAPI runs on each startup migration `d6ba8c13303e` (create default Tables in PG public schema if not exists)
+   - Can be run manual: `alembic -x tenant=public upgrade d6ba8c13303e`
+
+ - Create new schema (ex: `a`) and store information about it:  ``GET /create?name=a&schema=a&host=a`
+ - Apply all migrations: `GET /upgrade?schema=a`
+   - manual test `alembic -x dry_run=True -x tenant=a upgrade head`
+   - Manual run: `alembic -x tenant=a upgrade head`
+
 
 ### Alembic
 
