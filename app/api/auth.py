@@ -119,9 +119,12 @@ async def auth_login(*, shared_db: Session = Depends(get_public_db), user: UserL
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
     with Session(autocommit=False, autoflush=False, bind=connectable) as db:
 
-        # db_user = crud_auth.get_tenant_user_by_email(db, user.email)
-        db_user = db.execute(select(User).where(User.email == "user@example.com")).scalar_one_or_none()
-        print(db_user.role_FK)
+        db_user = crud_auth.get_tenant_user_by_email(db, user.email)
+        # db_user = db.execute(
+        #     select(User).where(User.email == user.email).options(selectinload("*"))
+        # ).scalar_one_or_none()
+        _ = db_user.role_FK
+        # print(db_user.role_FK)
         if db_user is None:
             raise HTTPException(status_code=404, detail="User not found")
         return db_user
