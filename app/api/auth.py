@@ -1,17 +1,21 @@
 import secrets
 from datetime import datetime, timedelta
 
+from fastapi import APIRouter, Depends, HTTPException, Request
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
 from app.crud import crud_auth
-from app.db import engine, get_public_db
-from app.models.shared_models import PublicCompany, PublicUser
+from app.db import engine, get_db, get_public_db
+from app.models.models import User
+from app.models.shared_models import PublicUser
 from app.schemas.requests import UserFirstRunIn, UserLoginIn, UserRegisterIn
-from app.schemas.responses import StandardResponse, UserLoginOut
+from app.schemas.responses import StandardResponse  # UserLoginOut
+from app.schemas.schemas import UserLoginOut
 from app.service import auth
 from app.service.api_rejestr_io import get_company_details
 from app.service.password import Password
 from app.service.tenants import alembic_upgrade_head, tenant_create
-from fastapi import APIRouter, Depends, HTTPException, Request
-from sqlalchemy.orm import Session
 
 auth_router = APIRouter()
 
@@ -52,7 +56,6 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
 
     db_company = crud_auth.get_public_company_by_nip(shared_db, user.nip)
     user_role_id = 2  # SUPER_ADMIN[1] / USER[2] / VIEWER[3]
-    is_verified = False
 
     if not db_company:
         company_data = get_company_details(user.nip)
@@ -62,7 +65,6 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
         tenant_create(db_company.tenant_id)
         alembic_upgrade_head(db_company.tenant_id)
         user_role_id = 1  # SUPER_ADMIN[1] / USER[2] / VIEWER[3]
-        is_verified = True
 
     update_db_user = {
         "PublicUser_id": db_company.tenant_id,
@@ -105,13 +107,9 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
     }
 
 
-@auth_router.post("/login")  # , response_model=UserLoginOut
+@auth_router.post("/login", response_model=UserLoginOut)  # , response_model=UserLoginOut
 async def auth_login(*, shared_db: Session = Depends(get_public_db), user: UserLoginIn, req: Request):
-    ua_string = req.headers["User-Agent"]
-    # browser_lang = req.headers["accept-language"]
-
-    # res = UserLoginIn.from_orm(users)
-
+    req.headers["User-Agent"]
     db_public_user: PublicUser = crud_auth.get_public_user_by_email(shared_db, user.email)
 
     if db_public_user is None:
@@ -119,9 +117,20 @@ async def auth_login(*, shared_db: Session = Depends(get_public_db), user: UserL
 
     schema_translate_map = dict(tenant=db_public_user.tenant_id)
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
-    with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
+    with Session(autocommit=False, autoflush=False, bind=connectable) as db:
 
-        db_user = crud_auth.get_tenant_user_by_email(db, user.email)
+        # db_user = crud_auth.get_tenant_user_by_email(db, user.email)
+        db_user = db.execute(select(User).where(User.email == "user@example.com")).scalar_one_or_none()
+        print(db_user.role_FK)
         if db_user is None:
             raise HTTPException(status_code=404, detail="User not found")
         return db_user
+
+
+@auth_router.post("/login_tenant", response_model=UserLoginOut)  # , response_model=UserLoginOut
+async def auth_login(*, db: Session = Depends(get_db), email: str, req: Request):
+
+    db_user = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return db_user

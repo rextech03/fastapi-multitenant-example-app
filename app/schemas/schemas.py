@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import Any, List
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr
@@ -104,7 +104,7 @@ class UserLoginOut(BaseModel):  # OK
     tz: str
     lang: str
     uuid: UUID
-    role_FK: RoleBasic
+    role_FK: Any
 
     class Config:
         orm_mode = True

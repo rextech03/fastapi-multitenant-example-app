@@ -8,7 +8,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
-from app.models.shared_models import Tenant
+from app.models.shared_models import PublicCompany
 
 settings = get_settings()
 
@@ -50,12 +50,14 @@ class TenantNotFoundError(Exception):
         super().__init__(self.message)
 
 
-def get_tenant(req: Request) -> Tenant:
+def get_tenant(req: Request) -> PublicCompany:
     try:
         host_without_port = req.headers["host"].split(":", 1)[0]
 
         with with_db(None) as db:
-            tenant = db.execute(select(Tenant).where(Tenant.schema_header_id == host_without_port)).scalar_one_or_none()
+            tenant = db.execute(
+                select(PublicCompany).where(PublicCompany.tenant_id == host_without_port)
+            ).scalar_one_or_none()
 
         if tenant is None:
             raise TenantNotFoundError(host_without_port)
@@ -64,9 +66,9 @@ def get_tenant(req: Request) -> Tenant:
     return tenant
 
 
-def get_db(tenant: Tenant = Depends(get_tenant)):
+def get_db(tenant: PublicCompany = Depends(get_tenant)):
     # print("tenant.schema", tenant.schema)
-    with with_db(tenant.schema) as db:
+    with with_db(tenant.tenant_id) as db:
         yield db
 
 

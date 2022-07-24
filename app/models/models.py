@@ -1,7 +1,8 @@
 import sqlalchemy as sa
-from app.db import Base
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
+
+from app.db import Base
 
 # role_permission_rel = Table(
 #     "roles_permissions_link",
