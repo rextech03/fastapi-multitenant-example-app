@@ -1,10 +1,10 @@
 import argparse
-import os
 import traceback
 
 import sqlalchemy as sa
 from alembic import command
 from alembic.config import Config
+
 from app.config import get_settings
 from app.db import SQLALCHEMY_DATABASE_URL, with_db
 

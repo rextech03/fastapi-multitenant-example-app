@@ -72,7 +72,9 @@ def create_tenant_user(db: Session, tenant_data) -> User:
             password=tenant_data["password"],
             # service_token=secrets.token_hex(32),
             # service_token_valid_to=datetime.utcnow() + timedelta(days=1),
-            user_role_id=1,
+            auth_token=tenant_data["auth_token"],
+            auth_token_valid_to=tenant_data["auth_token_valid_to"],
+            user_role_id=tenant_data["role_id"],
             is_active=False,
             is_verified=False,
             tos=tenant_data["tos"],
@@ -89,7 +91,7 @@ def create_tenant_user(db: Session, tenant_data) -> User:
     return new_user
 
 
-def create_public_company(db: Session, company: PubliCompanyAdd):
+def create_public_company(db: Session, company: PubliCompanyAdd) -> PublicCompany:
 
     uuid = str(uuid4())
     tenanat_id = unidecode(company["short_name"]).lower() + "_" + uuid.replace("-", "")
@@ -113,7 +115,7 @@ def create_public_company(db: Session, company: PubliCompanyAdd):
     return new_company
 
 
-def update_public_user(db: Session, db_user: PublicUser, update_data: dict):
+def update_public_user(db: Session, db_user: PublicUser, update_data: dict) -> PublicUser:
     for key, value in update_data.items():
         setattr(db_user, key, value)
 

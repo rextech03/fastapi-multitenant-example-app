@@ -14,7 +14,8 @@ down_revision = None
 branch_labels = None
 depends_on = None
 
-# op.execute("CREATE SCHEMA IF NOT EXISTS public;")
+# op.execute("DROP SCHEMA IF EXISTS test_00000000000000000000000000000000;")
+# op.execute("CREATE SCHEMA IF NOT EXISTS test_00000000000000000000000000000000;")
 
 
 def upgrade() -> None:

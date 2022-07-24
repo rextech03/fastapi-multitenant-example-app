@@ -1,4 +1,5 @@
-from datetime import datetime
+import secrets
+from datetime import datetime, timedelta
 
 from app.crud import crud_auth
 from app.db import engine, get_public_db
@@ -51,6 +52,7 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
 
     db_company = crud_auth.get_public_company_by_nip(shared_db, user.nip)
     user_role_id = 2  # SUPER_ADMIN[1] / USER[2] / VIEWER[3]
+    is_verified = False
 
     if not db_company:
         company_data = get_company_details(user.nip)
@@ -60,6 +62,7 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
         tenant_create(db_company.tenant_id)
         alembic_upgrade_head(db_company.tenant_id)
         user_role_id = 1  # SUPER_ADMIN[1] / USER[2] / VIEWER[3]
+        is_verified = True
 
     update_db_user = {
         "tenant_id": db_company.tenant_id,
@@ -72,8 +75,6 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
     }
 
     crud_auth.update_public_user(shared_db, db_user, update_db_user)
-    print("@@@@@@@@@@@@@", db_company.tenant_id)
-    # schema_translate_map = dict(tenant="v2_92216c51ccbe43e88f91d90144d512a6")
     connectable = engine.execution_options(schema_translate_map={"tenant": db_company.tenant_id})
     with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
 
@@ -82,22 +83,25 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
             "last_name": user.last_name,
             "email": db_user.email,
             "password": db_user.password,
+            "auth_token": secrets.token_hex(32),
+            "auth_token_valid_to": datetime.utcnow() + timedelta(days=1),
+            "role_id": user_role_id,
             "tos": db_user.tos,
             "lang": db_user.lang,
             "tz": db_user.tz,
         }
 
-        crud_auth.create_tenant_user(db, tenant_data)
+        db_tennat_user = crud_auth.create_tenant_user(db, tenant_data)
 
     return {
         "ok": True,
-        # "first_name": db_user.first_name,
-        # "last_name": db_user.last_name,
-        # "lang": db_user.lang,
-        # "tz": db_user.tz,
-        # "uuid": db_user.uuid,
-        # "tenanat_id": tenanat_id,
-        # "token": "token",
+        "first_name": db_tennat_user.first_name,
+        "last_name": db_tennat_user.last_name,
+        "lang": db_tennat_user.lang,
+        "tz": db_tennat_user.tz,
+        "uuid": db_tennat_user.uuid,
+        "tenanat_id": db_company.tenant_id,
+        "token": db_tennat_user.auth_token,
     }
 
 

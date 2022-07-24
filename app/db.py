@@ -55,9 +55,7 @@ def get_tenant(req: Request) -> Tenant:
         host_without_port = req.headers["host"].split(":", 1)[0]
 
         with with_db(None) as db:
-            tenant = db.execute(
-                select(Tenant).where(Tenant.schema_header_id == host_without_port)
-            ).scalar_one_or_none()
+            tenant = db.execute(select(Tenant).where(Tenant.schema_header_id == host_without_port)).scalar_one_or_none()
 
         if tenant is None:
             raise TenantNotFoundError(host_without_port)

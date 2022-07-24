@@ -84,6 +84,8 @@ class User(Base):
     password = sa.Column(sa.VARCHAR(length=256), autoincrement=False, nullable=True, unique=True)
     first_name = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
     last_name = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
+    auth_token = sa.Column(sa.VARCHAR(length=128), autoincrement=False, nullable=True, unique=True)
+    auth_token_valid_to = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     user_role_id = sa.Column(sa.INTEGER(), sa.ForeignKey("roles.id"), autoincrement=False, nullable=True)
     is_active = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     is_verified = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
