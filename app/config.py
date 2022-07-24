@@ -1,15 +1,15 @@
 import os
 from functools import lru_cache
+from pathlib import Path
 from typing import Literal
 
 from pydantic import BaseSettings
-
-# PROJECT_DIR = Path(__file__).parent.parent
 
 # print(PROJECT_DIR)
 
 
 class Settings(BaseSettings):
+    PROJECT_DIR = Path(__file__).parent.parent
     ENVIRONMENT: Literal["DEV", "PYTEST", "STG", "PRD"] = os.getenv("APP_ENV")
 
     # API

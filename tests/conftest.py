@@ -18,14 +18,11 @@ from alembic.config import Config
 from app.config import Settings
 from app.db import get_db
 from app.main import app
-from commands import first_migration
+from app.service.tenants import alembic_upgrade_head, tenant_create
 from dotenv import load_dotenv
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-
-# from app.service.tenants import alembic_upgrade_head, tenant_create
-
 
 # def get_settings_override():
 #     return Settings(testing=1, TEST_SQLALCHEMY_DATABASE_URI='os.environ.get("DATABASE_TEST_URL")')
@@ -45,9 +42,8 @@ def apply_migrations():
     warnings.filterwarnings("ignore", category=DeprecationWarning)
     os.environ["TESTING"] = "1"
 
-    first_migration()
     # tenant_create("a")
-    # alembic_upgrade_head("a")
+    alembic_upgrade_head("a")
     yield
     # alembic.command.downgrade(config, "base")
 
