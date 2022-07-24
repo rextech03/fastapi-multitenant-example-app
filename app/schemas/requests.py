@@ -20,3 +20,9 @@ class UserFirstRunIn(BaseRequest):  # OK
     last_name: str
     nip: str = "1234563218"
     token: str
+
+
+class UserLoginIn(BaseRequest):  # OK
+    email: EmailStr
+    password: str
+    permanent: bool

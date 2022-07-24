@@ -15,7 +15,7 @@ from unidecode import unidecode
 
 
 def get_public_user_by_email(db: Session, email: str) -> PublicUser | None:
-    return db.execute(select(PublicUser.email).where(PublicUser.email == email)).scalar_one_or_none()
+    return db.execute(select(PublicUser).where(PublicUser.email == email)).scalar_one_or_none()
 
 
 def get_public_user_by_service_token(db: Session, token: str) -> PublicUser | None:
@@ -62,35 +62,6 @@ def create_public_user(db: Session, user: UserRegisterIn) -> PublicUser:
     return new_user
 
 
-def create_tenant_user(db: Session, tenant_data) -> User:
-    try:
-        new_user = User(
-            uuid=str(uuid4()),
-            first_name=tenant_data["first_name"],
-            last_name=tenant_data["last_name"],
-            email=tenant_data["email"],
-            password=tenant_data["password"],
-            # service_token=secrets.token_hex(32),
-            # service_token_valid_to=datetime.utcnow() + timedelta(days=1),
-            auth_token=tenant_data["auth_token"],
-            auth_token_valid_to=tenant_data["auth_token_valid_to"],
-            user_role_id=tenant_data["role_id"],
-            is_active=False,
-            is_verified=False,
-            tos=tenant_data["tos"],
-            tz=tenant_data["tz"],
-            lang=standardize_tag(tenant_data["lang"]),
-            created_at=datetime.utcnow(),
-        )
-
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
-    except Exception as e:
-        print(e)
-    return new_user
-
-
 def create_public_company(db: Session, company: PubliCompanyAdd) -> PublicCompany:
 
     uuid = str(uuid4())
@@ -123,4 +94,41 @@ def update_public_user(db: Session, db_user: PublicUser, update_data: dict) -> P
     db.commit()
     db.refresh(db_user)
 
+    return db_user
+
+
+def create_tenant_user(db: Session, tenant_data) -> User:
+    try:
+        new_user = User(
+            uuid=str(uuid4()),
+            first_name=tenant_data["first_name"],
+            last_name=tenant_data["last_name"],
+            email=tenant_data["email"],
+            password=tenant_data["password"],
+            # service_token=secrets.token_hex(32),
+            # service_token_valid_to=datetime.utcnow() + timedelta(days=1),
+            auth_token=tenant_data["auth_token"],
+            auth_token_valid_to=tenant_data["auth_token_valid_to"],
+            user_role_id=tenant_data["role_id"],
+            is_active=False,
+            is_verified=False,
+            tos=tenant_data["tos"],
+            tz=tenant_data["tz"],
+            lang=standardize_tag(tenant_data["lang"]),
+            created_at=datetime.utcnow(),
+        )
+
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+    except Exception as e:
+        print(e)
+    return new_user
+
+
+def get_tenant_user_by_email(db: Session, email: str) -> User:
+    try:
+        db_user = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
+    except Exception as e:
+        print(e)
     return db_user

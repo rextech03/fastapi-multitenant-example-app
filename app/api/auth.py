@@ -3,14 +3,14 @@ from datetime import datetime, timedelta
 
 from app.crud import crud_auth
 from app.db import engine, get_public_db
-from app.models.shared_models import PublicUser
-from app.schemas.requests import UserFirstRunIn, UserRegisterIn
-from app.schemas.responses import StandardResponse
+from app.models.shared_models import PublicCompany, PublicUser
+from app.schemas.requests import UserFirstRunIn, UserLoginIn, UserRegisterIn
+from app.schemas.responses import StandardResponse, UserLoginOut
 from app.service import auth
 from app.service.api_rejestr_io import get_company_details
 from app.service.password import Password
 from app.service.tenants import alembic_upgrade_head, tenant_create
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 auth_router = APIRouter()
@@ -22,7 +22,7 @@ async def auth_register(*, shared_db: Session = Depends(get_public_db), user: Us
     if auth.is_email_temporary(user.email):
         raise HTTPException(status_code=400, detail="Temporary email not allowed")
 
-    db_user = crud_auth.get_public_user_by_email(shared_db, user.email)
+    db_user: PublicUser = crud_auth.get_public_user_by_email(shared_db, user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="User already exists")
 
@@ -65,7 +65,7 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
         is_verified = True
 
     update_db_user = {
-        "tenant_id": db_company.tenant_id,
+        "PublicUser_id": db_company.tenant_id,
         # "is_active": True,
         # "is_verified": is_verified,
         # "user_role_id": user_role_id,
@@ -75,10 +75,10 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
     }
 
     crud_auth.update_public_user(shared_db, db_user, update_db_user)
-    connectable = engine.execution_options(schema_translate_map={"tenant": db_company.tenant_id})
+    connectable = engine.execution_options(schema_translate_map={"tenant": db_company.PublicUser_id})
     with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
 
-        tenant_data = {
+        PublicUser_data = {
             "first_name": user.first_name,
             "last_name": user.last_name,
             "email": db_user.email,
@@ -91,7 +91,7 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
             "tz": db_user.tz,
         }
 
-        db_tennat_user = crud_auth.create_tenant_user(db, tenant_data)
+        db_tennat_user = crud_auth.create_PublicUser_user(db, PublicUser_data)
 
     return {
         "ok": True,
@@ -100,38 +100,28 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
         "lang": db_tennat_user.lang,
         "tz": db_tennat_user.tz,
         "uuid": db_tennat_user.uuid,
-        "tenanat_id": db_company.tenant_id,
+        "tenanat_id": db_company.PublicUser_id,
         "token": db_tennat_user.auth_token,
     }
 
 
-# @auth_router.post("/login")  # , response_model=UserLoginOut
-# async def auth_login(*, shared_db: Session = Depends(get_public_db), users: UserLoginIn, req: Request):
-#     ua_string = req.headers["User-Agent"]
-#     # browser_lang = req.headers["accept-language"]
+@auth_router.post("/login")  # , response_model=UserLoginOut
+async def auth_login(*, shared_db: Session = Depends(get_public_db), user: UserLoginIn, req: Request):
+    ua_string = req.headers["User-Agent"]
+    # browser_lang = req.headers["accept-language"]
 
-#     try:
-#         res = UserLoginIn.from_orm(users)
+    # res = UserLoginIn.from_orm(users)
 
-#         db_shared_user = shared_db.execute(
-#             select(PublicUser).where(PublicUser.email == res.email).where(PublicUser.is_active == True)
-#         ).scalar_one_or_none()
+    db_public_user: PublicUser = crud_auth.get_public_user_by_email(shared_db, user.email)
 
-#         db_shared_tenant = shared_db.execute(
-#             select(Tenant).where(Tenant.id == db_shared_user.tenant_id)
-#         ).scalar_one_or_none()
+    if db_public_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
 
-#         if db_shared_user is None:
-#             raise HTTPException(status_code=404, detail="User not found")
+    schema_translate_map = dict(tenant=db_public_user.tenant_id)
+    connectable = engine.execution_options(schema_translate_map=schema_translate_map)
+    with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
 
-#         # ----------------
-#         schema_translate_map = dict(tenant=db_shared_tenant.schema)
-#         connectable = engine.execution_options(schema_translate_map=schema_translate_map)
-#         with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
-#             db_user = db.execute(select(User).where(User.id == 1)).scalar_one_or_none()
-
-#     except Exception as err:
-#         print(err)
-#         raise HTTPException(status_code=404, detail="User not found")
-
-#     return db_user
+        db_user = crud_auth.get_tenant_user_by_email(db, user.email)
+        if db_user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+        return db_user
