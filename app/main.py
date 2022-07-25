@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from faker import Faker
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 from sqlalchemy import select
@@ -71,8 +71,8 @@ async def startup():
 
 
 @app.get("/")
-def read_root():
-    return {"Hello": "World"}
+def read_root(request: Request):
+    return {"Hello": "World", "Host": request.headers["host"]}
 
 
 @app.get("/create")

@@ -69,12 +69,35 @@ class Book(Base):
     author = sa.Column(sa.String(256), nullable=False, unique=True)
 
 
+role_permission_rel = sa.Table(
+    "roles_permissions_link",
+    Base.metadata,
+    sa.Column("role_id", sa.ForeignKey("roles.id"), autoincrement=False, nullable=False, primary_key=True),
+    sa.Column("permission_id", sa.ForeignKey("permissions.id"), autoincrement=False, nullable=False, primary_key=True),
+)
+
+
 class Role(Base):
     __tablename__ = "roles"
     id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
     role_name = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
     role_description = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
     users_FK = relationship("User", back_populates="role_FK")
+    permission = relationship("Permission", secondary=role_permission_rel, back_populates="role")
+
+
+class Permission(Base):
+    __tablename__ = "permissions"
+    id = sa.Column(sa.INTEGER(), sa.Identity(), primary_key=True, autoincrement=True, nullable=False)
+    uuid = sa.Column(UUID(as_uuid=True), autoincrement=False, nullable=True)
+    name = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
+    title = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
+    description = sa.Column(sa.VARCHAR(length=100), autoincrement=False, nullable=True)
+
+    # PrimaryKeyConstraint("id", name="permissions_pkey"),
+    # UniqueConstraint("uuid", name="permissions_uuid_key"),
+
+    role = relationship("Role", secondary=role_permission_rel, back_populates="permission")
 
 
 class User(Base):

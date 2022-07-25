@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.crud import crud_auth
 from app.db import engine, get_db, get_public_db
@@ -119,10 +119,10 @@ async def auth_login(*, shared_db: Session = Depends(get_public_db), user: UserL
     connectable = engine.execution_options(schema_translate_map=schema_translate_map)
     with Session(autocommit=False, autoflush=False, bind=connectable) as db:
 
-        db_user = crud_auth.get_tenant_user_by_email(db, user.email)
-        # db_user = db.execute(
-        #     select(User).where(User.email == user.email).options(selectinload("*"))
-        # ).scalar_one_or_none()
+        # db_user = crud_auth.get_tenant_user_by_email(db, user.email)
+        db_user = db.execute(
+            select(User).where(User.email == user.email).options(selectinload("*"))
+        ).scalar_one_or_none()
         _ = db_user.role_FK
         # print(db_user.role_FK)
         if db_user is None:

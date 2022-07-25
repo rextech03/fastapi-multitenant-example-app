@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, List
+from typing import List
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr
@@ -47,9 +47,16 @@ class RoleBase(BaseModel):
         orm_mode = True
 
 
+class PermissionsMini(BaseModel):
+    name: str
+
+    class Config:
+        orm_mode = True
+
+
 class RoleBasic(BaseModel):
     role_name: str
-    # permission: List[PermissionsMini]
+    permission: List[PermissionsMini]
 
     class Config:
         orm_mode = True
@@ -104,7 +111,7 @@ class UserLoginOut(BaseModel):  # OK
     tz: str
     lang: str
     uuid: UUID
-    role_FK: Any
+    role_FK: RoleBasic
 
     class Config:
         orm_mode = True
