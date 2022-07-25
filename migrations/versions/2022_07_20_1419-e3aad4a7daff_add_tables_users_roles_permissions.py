@@ -47,6 +47,7 @@ def upgrade() -> None:
         sa.Column("service_token_valid_to", sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("tz", sa.VARCHAR(length=64), autoincrement=False, nullable=False),
         sa.Column("lang", sa.VARCHAR(length=8), autoincrement=False, nullable=False),
+        sa.Column("tenant_id", sa.VARCHAR(length=64), autoincrement=False, nullable=True),
         sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("updated_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),
         sa.Column("deleted_at", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=True),

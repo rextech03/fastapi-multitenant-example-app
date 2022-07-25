@@ -3,16 +3,15 @@ import secrets
 from datetime import datetime, timedelta
 from uuid import uuid4
 
+from app.models.models import User
+from app.models.shared_models import PublicCompany, PublicUser
+from app.schemas.requests import UserRegisterIn
+from app.schemas.schemas import PubliCompanyAdd
 from langcodes import standardize_tag
 from passlib.hash import argon2
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from unidecode import unidecode
-
-from app.models.models import User
-from app.models.shared_models import PublicCompany, PublicUser
-from app.schemas.requests import UserRegisterIn
-from app.schemas.schemas import PubliCompanyAdd
 
 
 def get_public_user_by_email(db: Session, email: str) -> PublicUser | None:
@@ -115,6 +114,7 @@ def create_tenant_user(db: Session, tenant_data) -> User:
             is_verified=False,
             tos=tenant_data["tos"],
             tz=tenant_data["tz"],
+            tenant_id=tenant_data["tenant_id"],
             lang=standardize_tag(tenant_data["lang"]),
             created_at=datetime.utcnow(),
         )

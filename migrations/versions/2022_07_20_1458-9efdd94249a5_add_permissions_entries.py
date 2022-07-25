@@ -91,6 +91,28 @@ def upgrade() -> None:
         ],
     )
 
+    roles_permissions_link = table(
+        "roles_permissions_link",
+        sa.Column("role_id", sa.ForeignKey("roles.id"), autoincrement=False, nullable=False, primary_key=True),
+        sa.Column(
+            "permission_id", sa.ForeignKey("permissions.id"), autoincrement=False, nullable=False, primary_key=True
+        ),
+    )
+
+    op.bulk_insert(
+        roles_permissions_link,
+        [
+            {
+                "role_id": 1,
+                "permission_id": 1,
+            },
+            {
+                "role_id": 2,
+                "permission_id": 1,
+            },
+        ],
+    )
+
 
 def downgrade() -> None:
     op.execute("DELETE FROM permissions WHERE name IN ('USER_ADD', 'USER_DELETE')", execution_options=None)

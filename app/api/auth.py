@@ -1,10 +1,6 @@
 import secrets
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, Request
-from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
-
 from app.crud import crud_auth
 from app.db import engine, get_db, get_public_db
 from app.models.models import User
@@ -16,6 +12,9 @@ from app.service import auth
 from app.service.api_rejestr_io import get_company_details
 from app.service.password import Password
 from app.service.tenants import alembic_upgrade_head, tenant_create
+from fastapi import APIRouter, Depends, HTTPException, Request
+from sqlalchemy import select
+from sqlalchemy.orm import Session, selectinload
 
 auth_router = APIRouter()
 
@@ -67,7 +66,7 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
         user_role_id = 1  # SUPER_ADMIN[1] / USER[2] / VIEWER[3]
 
     update_db_user = {
-        "PublicUser_id": db_company.tenant_id,
+        "tenant_id": db_company.tenant_id,
         # "is_active": True,
         # "is_verified": is_verified,
         # "user_role_id": user_role_id,
@@ -77,10 +76,10 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
     }
 
     crud_auth.update_public_user(shared_db, db_user, update_db_user)
-    connectable = engine.execution_options(schema_translate_map={"tenant": db_company.PublicUser_id})
+    connectable = engine.execution_options(schema_translate_map={"tenant": db_company.tenant_id})
     with Session(autocommit=False, autoflush=False, bind=connectable, future=True) as db:
 
-        PublicUser_data = {
+        tenant_data = {
             "first_name": user.first_name,
             "last_name": user.last_name,
             "email": db_user.email,
@@ -91,9 +90,10 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
             "tos": db_user.tos,
             "lang": db_user.lang,
             "tz": db_user.tz,
+            "tenant_id": db_company.tenant_id,
         }
 
-        db_tennat_user = crud_auth.create_PublicUser_user(db, PublicUser_data)
+        db_tennat_user = crud_auth.create_tenant_user(db, tenant_data)
 
     return {
         "ok": True,
@@ -102,7 +102,7 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
         "lang": db_tennat_user.lang,
         "tz": db_tennat_user.tz,
         "uuid": db_tennat_user.uuid,
-        "tenanat_id": db_company.PublicUser_id,
+        "tenanat_id": db_tennat_user.tenant_id,
         "token": db_tennat_user.auth_token,
     }
 
@@ -123,7 +123,7 @@ async def auth_login(*, shared_db: Session = Depends(get_public_db), user: UserL
         db_user = db.execute(
             select(User).where(User.email == user.email).options(selectinload("*"))
         ).scalar_one_or_none()
-        _ = db_user.role_FK
+        # _ = db_user.role_FK
         # print(db_user.role_FK)
         if db_user is None:
             raise HTTPException(status_code=404, detail="User not found")

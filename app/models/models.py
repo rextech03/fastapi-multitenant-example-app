@@ -1,8 +1,7 @@
 import sqlalchemy as sa
+from app.db import Base
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-
-from app.db import Base
 
 # role_permission_rel = Table(
 #     "roles_permissions_link",
@@ -116,6 +115,8 @@ class User(Base):
     tos = sa.Column(sa.BOOLEAN(), autoincrement=False, nullable=True)
     tz = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True, unique=True)
     lang = sa.Column(sa.VARCHAR(length=8), autoincrement=False, nullable=True, unique=True)
+    lang = sa.Column(sa.VARCHAR(length=8), autoincrement=False, nullable=True, unique=True)
+    tenant_id = sa.Column(sa.VARCHAR(length=64), autoincrement=False, nullable=True)
     created_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
     updated_at = sa.Column(sa.TIMESTAMP(timezone=True), autoincrement=False, nullable=True)
 
