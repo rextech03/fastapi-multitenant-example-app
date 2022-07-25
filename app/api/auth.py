@@ -107,7 +107,7 @@ async def auth_first_run(*, shared_db: Session = Depends(get_public_db), user: U
     }
 
 
-@auth_router.post("/login", response_model=UserLoginOut)  # , response_model=UserLoginOut
+@auth_router.post("/login", response_model=UserLoginOut)
 async def auth_login(*, shared_db: Session = Depends(get_public_db), user: UserLoginIn, req: Request):
     req.headers["User-Agent"]
     db_public_user: PublicUser = crud_auth.get_public_user_by_email(shared_db, user.email)
@@ -127,13 +127,15 @@ async def auth_login(*, shared_db: Session = Depends(get_public_db), user: UserL
         # print(db_user.role_FK)
         if db_user is None:
             raise HTTPException(status_code=404, detail="User not found")
+        db_user.tenant_id = db_public_user.tenant_id
         return db_user
 
 
-@auth_router.post("/login_tenant", response_model=UserLoginOut)  # , response_model=UserLoginOut
-async def auth_login(*, db: Session = Depends(get_db), email: str, req: Request):
+@auth_router.post("/login_tenant", response_model=UserLoginOut)
+async def auth_login(*, db: Session = Depends(get_db), email: str, request: Request):
 
     db_user = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
+    db_user.tenant_id = request.headers["host"]
     return db_user

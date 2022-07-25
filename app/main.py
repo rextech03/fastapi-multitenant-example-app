@@ -65,14 +65,13 @@ app = create_application()
 @app.on_event("startup")
 async def startup():
     logger.info("🚀 Starting up and initializing app...")
-    print(str(Path.cwd()))
     alembic_upgrade_head("public", "d6ba8c13303e")
     logger.info("🚀 Starting up and initializing app... DONE")
 
 
 @app.get("/")
 def read_root(request: Request):
-    return {"Hello": "World", "Host": request.headers["host"]}
+    return {"Hello": "World"}
 
 
 @app.get("/create")

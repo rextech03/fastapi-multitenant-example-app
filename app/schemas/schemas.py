@@ -112,6 +112,7 @@ class UserLoginOut(BaseModel):  # OK
     lang: str
     uuid: UUID
     role_FK: RoleBasic
+    tenant_id: str | None
 
     class Config:
         orm_mode = True
