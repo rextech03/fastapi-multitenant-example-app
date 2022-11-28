@@ -2,6 +2,12 @@ Based on [Multitenancy with FastAPI, SQLAlchemy and PostgreSQL](https://mergeboa
 
 Main differences: Alembic behavior. All tables are created using migrations. Each tenant schema has his own `alembic_version` table with information about current migration revision.
 
+---
+
+ ⚠️This is a proof of concept only. More mature version available in [this repository](https://github.com/mgurg/fastapi_docker)
+
+---
+
 ### Workflow
  - FastAPI runs on each startup migration `d6ba8c13303e` (create default Tables in PG public schema if not exists)
    - Can be run manual: `alembic -x tenant=public upgrade d6ba8c13303e`
